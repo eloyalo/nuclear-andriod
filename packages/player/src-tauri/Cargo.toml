@@ -36,15 +36,9 @@ percent-encoding = "2.3"
 tempfile = "3.10"
 tauri-plugin-opener = "2"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
-rmcp = { version = "0.17", features = ["server", "transport-streamable-http-server"] }
-schemars = "1.0"
-async-stream = "0.3"
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "json"] }
-rust-embed = "8"
-mime_guess = "2"
 tokio-util = { version = "0.7", features = ["rt"] }
 uuid = { version = "1.20.0", features = ["v4"] }
-discord-rich-presence = "1.1.0"
 libc = "0.2.183"
 tauri-plugin-os = "2"
 sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "migrate"] }
@@ -53,8 +47,21 @@ specta-typescript = "0.0.12"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+# Desktop-only integrations: MCP server, local HTTP API, Discord rich presence.
+rmcp = { version = "0.17", features = ["server", "transport-streamable-http-server"] }
+schemars = "1.0"
+async-stream = "0.3"
+rust-embed = "8"
+mime_guess = "2"
+discord-rich-presence = "1.1.0"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+# reqwest's default certificate verifier needs a JVM Context on Android; we give
+# it a rustls config with the webpki roots baked in instead. See src/tls.rs.
+rustls = { version = "0.23", default-features = false, features = ["std", "aws-lc-rs", "tls12", "logging"] }
+webpki-roots = "1"
 
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 tauri-plugin-window-state = "2.4.1"

@@ -59,7 +59,9 @@ const SETTINGS_TABS = [
 
 export const ConnectedSettingsModal: FC = () => {
   const { t } = useTranslation('preferences');
-  const { isOpen, close, activeTab, setActiveTab } = useSettingsModalStore();
+  const { t: tNav } = useTranslation('navigation');
+  const { isOpen, close, activeTab, setActiveTab, isNavOpen, setNavOpen } =
+    useSettingsModalStore();
 
   const tabs = SETTINGS_TABS.map((tab) => ({
     ...tab,
@@ -73,6 +75,9 @@ export const ConnectedSettingsModal: FC = () => {
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={(tabId) => setActiveTab(tabId as SettingsTab)}
+      isNavOpen={isNavOpen}
+      onNavOpenChange={setNavOpen}
+      navLabel={tNav('menu')}
       navFooter={
         <div className="flex flex-col items-center gap-2">
           <SocialLinks />

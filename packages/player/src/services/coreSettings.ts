@@ -1,6 +1,7 @@
 import type { SettingDefinition } from '@nuclearplayer/plugin-sdk';
 
 import { registerCoreSettings } from '../stores/settingsStore';
+import { isMobile } from '../utils/platform';
 
 const LANGUAGE_OPTIONS = [
   { value: 'en_US', label: 'English' },
@@ -326,6 +327,38 @@ export const CORE_SETTINGS: SettingDefinition[] = [
   },
 ];
 
+/**
+ * Settings whose backing module isn't compiled into the mobile binary (see the
+ * `#[cfg(desktop)]` blocks in src-tauri/src/lib.rs) or that describe a desktop
+ * window that doesn't exist there. Registering them on a phone would show
+ * toggles with nothing behind them.
+ */
+const DESKTOP_ONLY_SETTING_IDS = new Set([
+  // No window to undecorate, and no custom title bar on mobile.
+  'appearance.framelessWindow',
+  'appearance.customTitleBar',
+  'appearance.titleBarStyle',
+  // tauri-plugin-updater is desktop-only; the app updates through the store.
+  'updates.checkForUpdates',
+  'updates.autoInstall',
+  // http_api, mcp, mpd and discord are all #[cfg(desktop)].
+  'integrations.jam.enabled',
+  'integrations.jam.remoteUrl',
+  'integrations.jam.apiUrl',
+  'integrations.mcp.enabled',
+  'integrations.mcp.serverUrl',
+  'integrations.mpd.enabled',
+  'integrations.mpd.serverUrl',
+  'integrations.discord.enabled',
+]);
+
+export const getCoreSettingsForPlatform = (): SettingDefinition[] =>
+  isMobile()
+    ? CORE_SETTINGS.filter(
+        (definition) => !DESKTOP_ONLY_SETTING_IDS.has(definition.id),
+      )
+    : CORE_SETTINGS;
+
 export const registerBuiltInCoreSettings = () => {
-  registerCoreSettings(CORE_SETTINGS);
+  registerCoreSettings(getCoreSettingsForPlatform());
 };

@@ -14,6 +14,9 @@ export const PlayerShell: FC<PlayerShellProps> = ({
     <div
       className={cn(
         'grid h-screen w-screen grid-rows-[auto_1fr_auto] overflow-hidden',
+        // Keeps the shell clear of the Android status and navigation bars;
+        // a no-op on desktop.
+        'safe-area-inset',
         className,
       )}
       {...props}

@@ -207,3 +207,115 @@ exports[`PlayerWorkspace > (Snapshot) both sidebars expanded 1`] = `
   </div>
 </DocumentFragment>
 `;
+
+exports[`PlayerWorkspace > compact layout > (Snapshot) renders the sidebars as overlay drawers 1`] = `
+<DocumentFragment>
+  <div
+    class="surface-muted relative grid h-full min-h-0 grid-cols-1"
+  >
+    <div
+      animate="[object Object]"
+      class="absolute inset-0 z-30 bg-black/50"
+      data-testid="sidebar-backdrop-left"
+      exit="[object Object]"
+      initial="[object Object]"
+    />
+    <div
+      animate="[object Object]"
+      aria-hidden="false"
+      class="border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden surface-sidebar-left left-0 border-r-(length:--border-width) p-2"
+      data-testid="sidebar-drawer-left"
+      transition="[object Object]"
+    >
+      <span
+        class="mb-4 flex flex-row items-center justify-end"
+      >
+        <button
+          class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 surface-primary border-border shadow-shadow hover:translate-x-shadow-x hover:translate-y-shadow-y border-(length:--border-width) hover:shadow-none size-10 justify-center top-2 px-2 right-1"
+          data-headlessui-state=""
+          data-testid="sidebar-toggle-left"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-panel-left"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M9 3v18"
+            />
+          </svg>
+        </button>
+      </span>
+      <div
+        class="flex flex-1 flex-col overflow-hidden"
+      />
+    </div>
+    <main
+      class="surface-muted overflow-auto"
+      data-testid="player-workspace-main"
+    />
+    <div
+      animate="[object Object]"
+      aria-hidden="true"
+      class="border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2 surface-sidebar-right right-0 border-l-(length:--border-width) pointer-events-none"
+      data-testid="sidebar-drawer-right"
+      transition="[object Object]"
+    >
+      <span
+        class="mb-4 flex flex-row items-center justify-start"
+      >
+        <button
+          class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 surface-primary border-border shadow-shadow hover:translate-x-shadow-x hover:translate-y-shadow-y border-(length:--border-width) hover:shadow-none size-10 justify-center top-2 px-2 left-1"
+          data-headlessui-state=""
+          data-testid="sidebar-toggle-right"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-panel-right"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M15 3v18"
+            />
+          </svg>
+        </button>
+      </span>
+      <div
+        class="flex flex-1 flex-col overflow-hidden"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

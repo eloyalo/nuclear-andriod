@@ -34,7 +34,8 @@
     "favoriteArtists": "Ulubieni wykonawcy",
     "playlists": "Listy odtwarzania",
     "history": "History",
-    "sources": "Sources"
+    "sources": "Sources",
+    "menu": "Menu"
   },
   "history": {
     "title": "History",

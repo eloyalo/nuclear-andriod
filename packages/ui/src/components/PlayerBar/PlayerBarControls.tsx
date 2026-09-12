@@ -67,6 +67,7 @@ export const PlayerBarControls: FC<PlayerBarControlsProps> = ({
     <Tooltip
       content={isShuffleActive ? labels?.shuffleOn : labels?.shuffleOff}
       side="top"
+      wrapperClassName="max-sm:hidden"
     >
       <Button
         size="icon"
@@ -95,7 +96,11 @@ export const PlayerBarControls: FC<PlayerBarControlsProps> = ({
     >
       <SkipForward size={16} />
     </Button>
-    <Tooltip content={labels?.[REPEAT_LABEL_KEY[repeatMode]]} side="top">
+    <Tooltip
+      content={labels?.[REPEAT_LABEL_KEY[repeatMode]]}
+      side="top"
+      wrapperClassName="max-sm:hidden"
+    >
       <Button
         size="icon"
         variant={repeatMode !== 'off' ? 'default' : 'text'}
@@ -110,6 +115,7 @@ export const PlayerBarControls: FC<PlayerBarControlsProps> = ({
       <Tooltip
         content={isDiscoveryActive ? labels?.discoveryOn : labels?.discoveryOff}
         side="top"
+        wrapperClassName="max-sm:hidden"
       >
         <Button
           size="icon"

@@ -1,7 +1,14 @@
 import { ElementType, forwardRef, ReactNode } from 'react';
 
 export const createFramerMotionMock = (mod: typeof import('motion/react')) => {
-  const isDataProp = (key: string) => key.startsWith('data-');
+  // Keep the props that carry behaviour or semantics, so a `motion.div` stays
+  // clickable and accessible in tests; everything else is motion-only config
+  // that React would reject as an unknown DOM attribute.
+  const isDomSafeProp = (key: string) =>
+    key.startsWith('data-') ||
+    key.startsWith('aria-') ||
+    key === 'role' ||
+    /^on[A-Z]/.test(key);
 
   const make = (Tag: ElementType) =>
     forwardRef<unknown, { children?: ReactNode } & Record<string, unknown>>(
@@ -11,7 +18,7 @@ export const createFramerMotionMock = (mod: typeof import('motion/react')) => {
       ) => {
         const Comp = Tag as ElementType;
         const domSafeProps = Object.fromEntries(
-          Object.entries(rest).filter(([key]) => isDataProp(key)),
+          Object.entries(rest).filter(([key]) => isDomSafeProp(key)),
         );
         return (
           <Comp

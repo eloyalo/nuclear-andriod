@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/android-schema.json",
+  "identifier": "mobile-capability",
+  "description": "Permissions for the Android/iOS build. Desktop-only integrations (updater, process, window state, window controls) are intentionally absent.",
+  "platforms": [
+    "android",
+    "iOS"
+  ],
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "os:default"
+  ]
+}

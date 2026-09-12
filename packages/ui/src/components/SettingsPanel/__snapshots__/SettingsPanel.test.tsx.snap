@@ -1,3 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`SettingsPanel > (Snapshot) renders when open 1`] = `<DocumentFragment />`;
+
+exports[`SettingsPanel > compact layout > (Snapshot) renders behind a hamburger 1`] = `<DocumentFragment />`;

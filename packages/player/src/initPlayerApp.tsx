@@ -27,6 +27,7 @@ import { initializeSettingsStore } from './stores/settingsStore';
 import { initializeShortcutsStore } from './stores/shortcutsStore';
 import { hydrateThemeStore } from './stores/themeStore';
 import { useUpdaterStore } from './stores/updaterStore';
+import { isMobile, skipOnMobile } from './utils/platform';
 
 export const initPlayerApp = async (
   root: ReturnType<typeof import('react-dom/client').createRoot>,
@@ -40,11 +41,11 @@ export const initPlayerApp = async (
     .then(() => initializePlaylistStore())
     .then(() => registerBuiltInCoreSettings())
     .then(() => initDiscoveryService())
-    .then(() => initMcpHandler())
-    .then(() => initMpdHandler())
-    .then(() => initHttpApiHandler())
+    .then(skipOnMobile(initMcpHandler))
+    .then(skipOnMobile(initMpdHandler))
+    .then(skipOnMobile(initHttpApiHandler))
     .then(() => initBridgeHandler())
-    .then(() => initDiscordHandler())
+    .then(skipOnMobile(initDiscordHandler))
     .then(() => initPlaybackEventBridge())
     .then(() => initHistoryService())
     .then(() => applyLanguageFromSettings())
@@ -55,8 +56,10 @@ export const initPlayerApp = async (
     .then(() => applyThemeFromSettingsIfAny())
     .then(() => {
       void hydratePluginsFromRegistry();
-      void useUpdaterStore.getState().checkForUpdate();
-      void ytdlpEnsureInstalled();
+      if (!isMobile()) {
+        void useUpdaterStore.getState().checkForUpdate();
+        void ytdlpEnsureInstalled();
+      }
     });
 
   root.render(

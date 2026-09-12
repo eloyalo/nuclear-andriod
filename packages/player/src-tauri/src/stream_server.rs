@@ -170,7 +170,7 @@ async fn start_server(client: Arc<Client>, ready: oneshot::Sender<Result<u16, St
 
 pub fn init_stream_server(app_handle: AppHandle) {
     let client = Arc::new(
-        Client::builder()
+        crate::tls::client_builder()
             .user_agent(USER_AGENT)
             .read_timeout(Duration::from_secs(300))
             .connect_timeout(Duration::from_secs(30))

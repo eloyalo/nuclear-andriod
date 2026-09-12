@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react';
 
+import { cn } from '../../utils';
 import { SettingsTab } from './SettingsPanel';
 import { SettingsPanelNavItem } from './SettingsPanelNavItem';
 
@@ -8,6 +9,7 @@ type SettingsPanelNavProps = {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   footer?: ReactNode;
+  className?: string;
 };
 
 export const SettingsPanelNav: FC<SettingsPanelNavProps> = ({
@@ -15,8 +17,14 @@ export const SettingsPanelNav: FC<SettingsPanelNavProps> = ({
   activeTab,
   onTabChange,
   footer,
+  className,
 }) => (
-  <nav className="border-border flex w-56 shrink-0 flex-col border-r-(length:--border-width) p-4">
+  <nav
+    className={cn(
+      'border-border flex w-56 shrink-0 flex-col overflow-y-auto border-r-(length:--border-width) p-4',
+      className,
+    )}
+  >
     <div className="flex flex-col gap-1">
       {tabs.map((tab) => (
         <SettingsPanelNavItem

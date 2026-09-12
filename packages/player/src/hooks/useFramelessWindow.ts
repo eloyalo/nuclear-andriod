@@ -1,6 +1,7 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useEffect } from 'react';
 
+import { isMobile } from '../utils/platform';
 import { useCoreSetting } from './useCoreSetting';
 
 export const useFramelessWindow = () => {
@@ -8,6 +9,12 @@ export const useFramelessWindow = () => {
   const [customTitleBar] = useCoreSetting<boolean>('appearance.customTitleBar');
 
   useEffect(() => {
+    // Android has no window decorations to toggle, and the matching
+    // core:window:* permissions aren't granted to the mobile capability.
+    if (isMobile()) {
+      return;
+    }
+
     const window = getCurrentWindow();
 
     if (customTitleBar) {

@@ -1,18 +1,26 @@
 pub mod bridge;
 pub mod commands;
 pub mod db;
+#[cfg(desktop)]
 pub mod discord;
 pub mod history;
 pub mod http;
+#[cfg(desktop)]
 pub mod http_api;
 pub mod logging;
+#[cfg(desktop)]
 pub mod mcp;
+#[cfg(desktop)]
 pub mod mpd;
 pub mod net;
 pub mod pagination;
 mod setup;
 pub mod stream_server;
+pub mod tls;
 pub mod ytdlp;
+// yt-dlp is shipped as a downloaded binary, which Android doesn't allow us to
+// execute. See ANDROID_PORT.md 3.1 for the replacement plan.
+#[cfg(desktop)]
 pub mod ytdlp_setup;
 
 // Maximizes the window when running as a non-steam app in steam
@@ -30,10 +38,14 @@ fn maximize_for_gamescope(app: &tauri::App) {
     }
 }
 
+#[cfg(desktop)]
 fn typescript_export_config() -> specta_typescript::Typescript {
     specta_typescript::Typescript::default().header("/* eslint-disable */")
 }
 
+// MPD, MCP, the local HTTP API and Discord presence are desktop integrations;
+// they're left out of the mobile build entirely (see ANDROID_PORT.md 3.3).
+#[cfg(desktop)]
 fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
     tauri_specta::Builder::<tauri::Wry>::new().commands(tauri_specta::collect_commands![
         commands::is_flatpak,
@@ -71,13 +83,40 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
     ])
 }
 
+#[cfg(mobile)]
+fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
+    tauri_specta::Builder::<tauri::Wry>::new().commands(tauri_specta::collect_commands![
+        commands::is_flatpak,
+        commands::copy_dir_recursive,
+        commands::extract_zip,
+        commands::download_file,
+        http::http_fetch,
+        ytdlp::ytdlp_search,
+        ytdlp::ytdlp_get_stream,
+        ytdlp::ytdlp_get_playlist,
+        logging::get_startup_logs,
+        stream_server::stream_server_port,
+        bridge::bridge_respond,
+        bridge::bridge_notify,
+        history::commands::history_record_event,
+        history::commands::history_fetch,
+        history::commands::history_delete_range,
+        history::commands::history_hourly_listening_time,
+        history::commands::history_daily_listening_time,
+        history::commands::history_first_play_at,
+        history::commands::history_top_artists,
+        history::commands::history_top_albums,
+        history::commands::history_top_tracks
+    ])
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let is_flatpak = std::env::var("FLATPAK_ID").is_ok();
-
     let specta_builder = specta_builder();
 
-    #[cfg(debug_assertions)]
+    // Bindings are consumed by the frontend and generated from the desktop
+    // command set, which is a superset of the mobile one.
+    #[cfg(all(debug_assertions, desktop))]
     specta_builder
         .export(
             typescript_export_config(),
@@ -88,6 +127,7 @@ pub fn run() {
         )
         .expect("failed to export typescript bindings");
 
+    #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
@@ -95,13 +135,18 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_upload::init())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(setup::log_plugin());
 
-    if !is_flatpak {
-        builder = builder
-            .plugin(tauri_plugin_updater::Builder::new().build())
-            .plugin(tauri_plugin_process::init());
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_window_state::Builder::default().build());
+
+        let is_flatpak = std::env::var("FLATPAK_ID").is_ok();
+        if !is_flatpak {
+            builder = builder
+                .plugin(tauri_plugin_updater::Builder::new().build())
+                .plugin(tauri_plugin_process::init());
+        }
     }
 
     builder
@@ -109,12 +154,16 @@ pub fn run() {
         .setup(|app| {
             logging::mark_startup_complete();
             bridge::init_bridge(app.handle().clone());
-            mcp::init_mcp(app.handle().clone());
-            mpd::init_mpd(app.handle().clone());
-            http_api::init_http_api(app.handle().clone());
             stream_server::init_stream_server(app.handle().clone());
-            discord::init_discord(app.handle().clone());
             history::init_history(app.handle().clone());
+
+            #[cfg(desktop)]
+            {
+                mcp::init_mcp(app.handle().clone());
+                mpd::init_mpd(app.handle().clone());
+                http_api::init_http_api(app.handle().clone());
+                discord::init_discord(app.handle().clone());
+            }
 
             #[cfg(target_os = "linux")]
             maximize_for_gamescope(app);

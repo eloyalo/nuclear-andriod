@@ -1,11 +1,12 @@
 import { PanelLeft, PanelRight } from 'lucide-react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { FC, ReactNode, useRef } from 'react';
 
 import { cn } from '../../utils';
 import { Button } from '../Button';
-import { SIDEBAR_CONFIG } from './constants';
+import { SIDEBAR_ANIMATIONS, SIDEBAR_CONFIG } from './constants';
 import { useSidebarResize } from './hooks';
+import { useWorkspaceIsCompact } from './PlayerWorkspaceContext';
 
 export type PlayerWorkspaceSidebarPropsBase = {
   children?: ReactNode;
@@ -36,6 +37,7 @@ export const PlayerWorkspaceSidebar: FC<PlayerWorkspaceSidebarProps> = ({
   className = '',
 }) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const isCompact = useWorkspaceIsCompact();
   const { handleMouseDown, isResizingState } = useSidebarResize(
     width,
     onWidthChange,
@@ -44,6 +46,96 @@ export const PlayerWorkspaceSidebar: FC<PlayerWorkspaceSidebarProps> = ({
   );
 
   const currentWidth = isCollapsed ? SIDEBAR_CONFIG.COLLAPSED_WIDTH : width;
+  // In drawer mode the sidebar is fully open or fully off-screen; there is no
+  // collapsed-but-visible rail and no room for icon-only labels.
+  const isContentCollapsed = isCompact ? false : isCollapsed;
+
+  const header = (
+    <span
+      className={cn('mb-4 flex flex-row items-center', {
+        'justify-end': side === 'left',
+        'justify-start': side === 'right',
+      })}
+    >
+      <Button
+        data-testid={`sidebar-toggle-${side}`}
+        className={cn('top-2 px-2', {
+          'right-1': side === 'left',
+          'left-1': side === 'right',
+          'mx-1 mt-2': side === 'right' && isContentCollapsed,
+        })}
+        size="icon"
+        onClick={onToggle}
+      >
+        {side === 'left' ? <PanelLeft /> : <PanelRight />}
+      </Button>
+      {!isContentCollapsed && headerActions && (
+        <span className="flex flex-1 items-center justify-end gap-1">
+          {headerActions}
+        </span>
+      )}
+    </span>
+  );
+
+  const body = (
+    <>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {children}
+        {!isContentCollapsed && footer && (
+          <div className="mt-auto flex justify-center">{footer}</div>
+        )}
+      </div>
+
+      {persistentFooter && (
+        <div className="mt-auto flex flex-col items-center gap-2 py-2">
+          {persistentFooter}
+        </div>
+      )}
+    </>
+  );
+
+  if (isCompact) {
+    return (
+      <>
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              key={`sidebar-backdrop-${side}`}
+              data-testid={`sidebar-backdrop-${side}`}
+              className="absolute inset-0 z-30 bg-black/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+            />
+          )}
+        </AnimatePresence>
+        <motion.div
+          ref={sidebarRef}
+          data-testid={`sidebar-drawer-${side}`}
+          aria-hidden={isCollapsed}
+          className={cn(
+            'border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2',
+            {
+              'surface-sidebar-left left-0 border-r-(length:--border-width)':
+                side === 'left',
+              'surface-sidebar-right right-0 border-l-(length:--border-width)':
+                side === 'right',
+              'pointer-events-none': isCollapsed,
+            },
+            className,
+          )}
+          animate={{
+            x: isCollapsed ? (side === 'left' ? '-100%' : '100%') : '0%',
+          }}
+          transition={SIDEBAR_ANIMATIONS.width.spring}
+        >
+          {header}
+          {body}
+        </motion.div>
+      </>
+    );
+  }
 
   return (
     <motion.div
@@ -71,42 +163,8 @@ export const PlayerWorkspaceSidebar: FC<PlayerWorkspaceSidebarProps> = ({
             }
       }
     >
-      <span
-        className={cn('mb-4 flex flex-row items-center', {
-          'justify-end': side === 'left',
-          'justify-start': side === 'right',
-        })}
-      >
-        <Button
-          data-testid={`sidebar-toggle-${side}`}
-          className={cn('top-2 px-2', {
-            'right-1': side === 'left',
-            'left-1': side === 'right',
-            'mx-1 mt-2': side === 'right' && isCollapsed,
-          })}
-          size="icon"
-          onClick={onToggle}
-        >
-          {side === 'left' ? <PanelLeft /> : <PanelRight />}
-        </Button>
-        {!isCollapsed && headerActions && (
-          <span className="flex flex-1 items-center justify-end gap-1">
-            {headerActions}
-          </span>
-        )}
-      </span>
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {children}
-        {!isCollapsed && footer && (
-          <div className="mt-auto flex justify-center">{footer}</div>
-        )}
-      </div>
-
-      {persistentFooter && (
-        <div className="mt-auto flex flex-col items-center gap-2 py-2">
-          {persistentFooter}
-        </div>
-      )}
+      {header}
+      {body}
 
       {!isCollapsed && (
         <div

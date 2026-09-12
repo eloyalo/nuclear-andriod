@@ -1,12 +1,15 @@
 import { FC, ReactNode } from 'react';
 
+import { useIsCompactLayout } from '../../hooks/useIsCompactLayout';
 import { cn } from '../../utils';
+import { PlayerWorkspaceProvider } from './PlayerWorkspaceContext';
 import { PlayerWorkspaceLeftSidebar } from './PlayerWorkspaceLeftSidebar';
 import { PlayerWorkspaceRightSidebar } from './PlayerWorkspaceRightSidebar';
 
 type PlayerWorkspaceProps = {
   children: ReactNode;
   className?: string;
+  isCompact?: boolean;
 };
 
 type MainProps = {
@@ -34,16 +37,25 @@ type PlayerWorkspaceComponent = FC<PlayerWorkspaceProps> & {
 const PlayerWorkspaceImpl: FC<PlayerWorkspaceProps> = ({
   children,
   className = '',
+  isCompact,
 }) => {
+  const isCompactLayout = useIsCompactLayout();
+  // On a phone the sidebars turn into overlay drawers, so they leave the grid
+  // flow entirely and the main area gets the full width.
+  const compact = isCompact ?? isCompactLayout;
+
   return (
-    <div
-      className={cn(
-        'surface-muted relative grid h-full min-h-0 grid-cols-[auto_1fr_auto]',
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <PlayerWorkspaceProvider isCompact={compact}>
+      <div
+        className={cn(
+          'surface-muted relative grid h-full min-h-0',
+          compact ? 'grid-cols-1' : 'grid-cols-[auto_1fr_auto]',
+          className,
+        )}
+      >
+        {children}
+      </div>
+    </PlayerWorkspaceProvider>
   );
 };
 

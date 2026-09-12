@@ -3,7 +3,7 @@
 exports[`Sources view > (Snapshot) renders the view 1`] = `
 <DocumentFragment>
   <div
-    class="grid h-screen w-screen grid-rows-[auto_1fr_auto] overflow-hidden"
+    class="grid h-screen w-screen grid-rows-[auto_1fr_auto] overflow-hidden safe-area-inset"
   >
     <div
       aria-hidden="true"
@@ -12,7 +12,7 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
     />
     <div>
       <header
-        class="surface-topbar border-border grid h-12 grid-cols-[1fr_4fr_1fr] items-center gap-2 border-b-(length:--border-width) px-3 select-none"
+        class="surface-topbar border-border grid h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b-(length:--border-width) px-3 select-none sm:grid-cols-[1fr_4fr_1fr]"
         data-tauri-drag-region="true"
       >
         <div
@@ -1223,7 +1223,7 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
       class="surface-bottombar border-border flex h-16 items-center border-t-(length:--border-width) px-4"
     >
       <div
-        class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4"
+        class="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
         <div
           class="min-w-0"
@@ -1284,7 +1284,9 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
           <div
             class="flex items-center justify-center gap-2"
           >
-            <div>
+            <div
+              class="max-sm:hidden"
+            >
               <button
                 class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-transparent size-10 justify-center"
                 data-headlessui-state=""
@@ -1399,7 +1401,9 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
                 />
               </svg>
             </button>
-            <div>
+            <div
+              class="max-sm:hidden"
+            >
               <button
                 class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-transparent size-10 justify-center"
                 data-headlessui-state=""
@@ -1437,7 +1441,7 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
           </div>
         </div>
         <div
-          class="justify-self-end"
+          class="justify-self-end max-sm:hidden"
         >
           <div
             class="flex items-center gap-2"

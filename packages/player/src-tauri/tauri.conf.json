@@ -35,6 +35,9 @@
     "homepage": "https://nuclearplayer.com",
     "createUpdaterArtifacts": true,
     "targets": "all",
+    "android": {
+      "minSdkVersion": 26
+    },
     "icon": [
       "icons/icon.png",
       "icons/icon.icns",

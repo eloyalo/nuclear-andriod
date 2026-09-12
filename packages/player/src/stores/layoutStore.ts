@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type MobileDrawer = 'navigation' | 'queue';
+
 export interface LayoutState {
   leftSidebar: {
     isCollapsed: boolean;
@@ -10,6 +12,11 @@ export interface LayoutState {
     isCollapsed: boolean;
     width: number;
   };
+  // Which overlay drawer is open on a phone-sized screen. Only one at a time,
+  // and never persisted: the app always starts with both drawers closed.
+  openDrawer: MobileDrawer | null;
+  toggleDrawer: (drawer: MobileDrawer) => void;
+  closeDrawer: () => void;
   toggleLeftSidebar: () => void;
   toggleRightSidebar: () => void;
   setLeftSidebarWidth: (width: number) => void;
@@ -27,6 +34,12 @@ export const useLayoutStore = create<LayoutState>()(
         isCollapsed: false,
         width: 200,
       },
+      openDrawer: null,
+      toggleDrawer: (drawer: MobileDrawer) =>
+        set((state) => ({
+          openDrawer: state.openDrawer === drawer ? null : drawer,
+        })),
+      closeDrawer: () => set({ openDrawer: null }),
       toggleLeftSidebar: () =>
         set((state) => ({
           leftSidebar: {
@@ -58,6 +71,10 @@ export const useLayoutStore = create<LayoutState>()(
     }),
     {
       name: 'nuclear-layout-store',
+      partialize: (state) => ({
+        leftSidebar: state.leftSidebar,
+        rightSidebar: state.rightSidebar,
+      }),
     },
   ),
 );

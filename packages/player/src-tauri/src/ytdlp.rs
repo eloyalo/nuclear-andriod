@@ -17,7 +17,17 @@ fn get_ytdlp_path() -> Result<String, String> {
         Ok(guard) => match guard.as_ref() {
             Some(path) => Ok(path.clone()),
             None => {
-                Err("yt-dlp is not installed. It will be downloaded automatically.".to_string())
+                #[cfg(desktop)]
+                {
+                    Err("yt-dlp is not installed. It will be downloaded automatically."
+                        .to_string())
+                }
+                // Android can't execute a downloaded binary; the Innertube-based
+                // replacement is still pending (ANDROID_PORT.md 3.1).
+                #[cfg(mobile)]
+                {
+                    Err("yt-dlp is not available on this platform yet.".to_string())
+                }
             }
         },
         Err(_) => {

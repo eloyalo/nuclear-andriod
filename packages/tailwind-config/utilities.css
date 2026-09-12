@@ -121,3 +121,20 @@
     background-image: var(--accent-red-gradient, none);
     color: var(--accent-red-foreground);
 }
+
+/* Android draws edge to edge, and Chromium only fills env(safe-area-inset-*)
+   from the display cutout — never from the status or navigation bars. The
+   Android MainActivity injects the real window insets as --nuclear-inset-*,
+   and whichever source reports more wins. Both are 0px on desktop. */
+@utility safe-area-inset {
+    padding-top: max(env(safe-area-inset-top), var(--nuclear-inset-top, 0px));
+    padding-right: max(
+        env(safe-area-inset-right),
+        var(--nuclear-inset-right, 0px)
+    );
+    padding-bottom: max(
+        env(safe-area-inset-bottom),
+        var(--nuclear-inset-bottom, 0px)
+    );
+    padding-left: max(env(safe-area-inset-left), var(--nuclear-inset-left, 0px));
+}

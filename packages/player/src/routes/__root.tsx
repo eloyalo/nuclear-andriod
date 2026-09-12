@@ -26,30 +26,51 @@ import {
   QueueHeaderActions,
 } from '../components/ConnectedQueuePanel';
 import { ConnectedSettingsModal } from '../components/ConnectedSettingsModal';
+import { ConnectedThemeController } from '../components/ConnectedThemeController';
 import { ConnectedTitleBar } from '../components/ConnectedTitleBar';
 import { ConnectedTopBar } from '../components/ConnectedTopBar';
 import { DevTools } from '../components/DevTools';
 import { FlatpakWarningBanner } from '../components/FlatpakWarningBanner';
 import { SoundProvider } from '../components/SoundProvider';
 import { StreamResolver } from '../components/StreamResolver';
+import { useAndroidBackHandler } from '../hooks/useAndroidBackHandler';
+import { useWorkspaceLayout } from '../hooks/useWorkspaceLayout';
 import { GlobalShortcuts } from '../shortcuts';
-import { useLayoutStore } from '../stores/layoutStore';
 import { useSettingsModalStore } from '../stores/settingsModalStore';
 import { useStartupStore } from '../stores/startupStore';
 
 const RootComponent = () => {
   const { t } = useTranslation('navigation');
   const { t: tPrefs } = useTranslation('preferences');
-  const {
-    leftSidebar,
-    rightSidebar,
-    toggleLeftSidebar,
-    toggleRightSidebar,
-    setLeftSidebarWidth,
-    setRightSidebarWidth,
-  } = useLayoutStore();
+  const { isCompact, openDrawer, closeDrawer, left, right } =
+    useWorkspaceLayout();
   const openSettings = useSettingsModalStore((state) => state.open);
+  const isSettingsOpen = useSettingsModalStore((state) => state.isOpen);
+  const closeSettings = useSettingsModalStore((state) => state.close);
+  const isSettingsNavOpen = useSettingsModalStore((state) => state.isNavOpen);
+  const setSettingsNavOpen = useSettingsModalStore((state) => state.setNavOpen);
   const isStartingUp = useStartupStore((state) => state.isStartingUp);
+
+  // Android's back button peels off whatever overlay is on top before it starts
+  // unwinding the route history.
+  useAndroidBackHandler(() => {
+    if (isSettingsNavOpen) {
+      setSettingsNavOpen(false);
+      return true;
+    }
+    if (isSettingsOpen) {
+      closeSettings();
+      return true;
+    }
+    if (openDrawer !== null) {
+      closeDrawer();
+      return true;
+    }
+    return false;
+  });
+
+  const closeDrawerOnNavigate = isCompact ? closeDrawer : undefined;
+
   return (
     <PlayerShell onContextMenu={(e) => e.preventDefault()}>
       <GlobalShortcuts />
@@ -62,13 +83,14 @@ const RootComponent = () => {
       <SoundProvider>
         <PlayerWorkspace>
           <PlayerWorkspace.LeftSidebar
-            width={leftSidebar.width}
-            isCollapsed={leftSidebar.isCollapsed}
-            onWidthChange={setLeftSidebarWidth}
-            onToggle={toggleLeftSidebar}
+            {...left}
+            persistentFooter={isCompact ? <ConnectedThemeController /> : null}
           >
-            <SidebarNavigation isCompact={leftSidebar.isCollapsed}>
-              <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
+            <SidebarNavigation isCompact={!isCompact && left.isCollapsed}>
+              <div
+                className="flex flex-1 flex-col gap-2 overflow-y-auto"
+                onClick={closeDrawerOnNavigate}
+              >
                 <SidebarNavigationItem
                   to="/dashboard"
                   icon={<GaugeIcon />}
@@ -108,7 +130,10 @@ const RootComponent = () => {
               <SidebarNavigationItem
                 icon={<SettingsIcon />}
                 label={tPrefs('title')}
-                onClick={() => openSettings()}
+                onClick={() => {
+                  closeDrawerOnNavigate?.();
+                  openSettings();
+                }}
               />
             </SidebarNavigation>
           </PlayerWorkspace.LeftSidebar>
@@ -118,13 +143,12 @@ const RootComponent = () => {
           </PlayerWorkspace.Main>
 
           <PlayerWorkspace.RightSidebar
-            width={rightSidebar.width}
-            isCollapsed={rightSidebar.isCollapsed}
-            onWidthChange={setRightSidebarWidth}
-            onToggle={toggleRightSidebar}
+            {...right}
             headerActions={<QueueHeaderActions />}
           >
-            <ConnectedQueuePanel isCollapsed={rightSidebar.isCollapsed} />
+            <ConnectedQueuePanel
+              isCollapsed={!isCompact && right.isCollapsed}
+            />
           </PlayerWorkspace.RightSidebar>
         </PlayerWorkspace>
       </SoundProvider>
