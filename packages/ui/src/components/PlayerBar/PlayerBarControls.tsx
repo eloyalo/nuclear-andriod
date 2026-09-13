@@ -63,11 +63,12 @@ export const PlayerBarControls: FC<PlayerBarControlsProps> = ({
   showDiscovery,
   className = '',
 }) => (
-  <div className={cn('flex items-center justify-center gap-2', className)}>
+  <div
+    className={cn('flex items-center justify-center gap-1 sm:gap-2', className)}
+  >
     <Tooltip
       content={isShuffleActive ? labels?.shuffleOn : labels?.shuffleOff}
       side="top"
-      wrapperClassName="max-sm:hidden"
     >
       <Button
         size="icon"
@@ -96,11 +97,7 @@ export const PlayerBarControls: FC<PlayerBarControlsProps> = ({
     >
       <SkipForward size={16} />
     </Button>
-    <Tooltip
-      content={labels?.[REPEAT_LABEL_KEY[repeatMode]]}
-      side="top"
-      wrapperClassName="max-sm:hidden"
-    >
+    <Tooltip content={labels?.[REPEAT_LABEL_KEY[repeatMode]]} side="top">
       <Button
         size="icon"
         variant={repeatMode !== 'off' ? 'default' : 'text'}

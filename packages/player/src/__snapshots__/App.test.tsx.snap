@@ -927,11 +927,9 @@ exports[`App > should render snapshot 1`] = `
           class="justify-self-center"
         >
           <div
-            class="flex items-center justify-center gap-2"
+            class="flex items-center justify-center gap-1 sm:gap-2"
           >
-            <div
-              class="max-sm:hidden"
-            >
+            <div>
               <button
                 class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-transparent size-10 justify-center"
                 data-headlessui-state=""
@@ -1046,9 +1044,7 @@ exports[`App > should render snapshot 1`] = `
                 />
               </svg>
             </button>
-            <div
-              class="max-sm:hidden"
-            >
+            <div>
               <button
                 class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-transparent size-10 justify-center"
                 data-headlessui-state=""
