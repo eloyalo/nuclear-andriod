@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './styles/pluginOverrides.css';
+
 import App from './App';
 import { initLogStream } from './hooks/useLogStream';
 import { applyThemeFromSettingsIfAny } from './services/advancedThemeService';

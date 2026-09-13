@@ -151,12 +151,34 @@ describe('metadataHost', () => {
   });
 
   describe('artist metadata', () => {
+    it('fetches artistBio and decodes HTML entities in its text', async () => {
+      const fetchArtistBio = vi.fn().mockResolvedValue({
+        name: 'Rauf &amp; Faik',
+        disambiguation: 'duo &quot;twins&quot;',
+        bio: 'Rauf &amp; Faik is a duet. <a href="https://example.com">Read more</a>',
+        tags: ['r&amp;b'],
+        source: { provider: 'test-provider', id: 'artist-id' },
+      });
+      const provider = new MetadataProviderBuilder()
+        .withId('test-provider')
+        .withArtistMetadataCapabilities(['artistBio'])
+        .withFetchArtistBio(fetchArtistBio)
+        .build();
+      providersHost.register(provider);
+
+      const result = await metadataHost.fetchArtistBio('artist-id');
+
+      expect(fetchArtistBio).toHaveBeenCalledWith('artist-id');
+      expect(result).toEqual({
+        name: 'Rauf & Faik',
+        disambiguation: 'duo "twins"',
+        bio: 'Rauf & Faik is a duet. Read more',
+        tags: ['r&amp;b'],
+        source: { provider: 'test-provider', id: 'artist-id' },
+      });
+    });
+
     it.each([
-      {
-        method: 'fetchArtistBio',
-        mockMethod: 'withFetchArtistBio',
-        capability: 'artistBio',
-      },
       {
         method: 'fetchArtistSocialStats',
         mockMethod: 'withFetchArtistSocialStats',

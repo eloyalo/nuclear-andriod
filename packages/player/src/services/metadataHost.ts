@@ -17,6 +17,7 @@ import {
   type MetadataProvider,
 } from '@nuclearplayer/plugin-sdk';
 
+import { decodeHtmlEntities } from '../utils/html';
 import { providersHost } from './providersHost';
 
 const ALL_CATEGORIES: SearchCategory[] = [
@@ -133,10 +134,22 @@ export const createMetadataHost = (): MetadataHost => {
       return executeMetadataSearch(provider, params);
     },
 
-    fetchArtistBio: withArtistCapability<ArtistBio>(
-      'artistBio',
-      'fetchArtistBio',
-    ),
+    fetchArtistBio: async (
+      artistId: string,
+      providerId?: string,
+    ): Promise<ArtistBio> => {
+      const bio = await withArtistCapability<ArtistBio>(
+        'artistBio',
+        'fetchArtistBio',
+      )(artistId, providerId);
+      return {
+        ...bio,
+        name: decodeHtmlEntities(bio.name),
+        disambiguation:
+          bio.disambiguation && decodeHtmlEntities(bio.disambiguation),
+        bio: bio.bio && decodeHtmlEntities(bio.bio),
+      };
+    },
     fetchArtistSocialStats: withArtistCapability<ArtistSocialStats>(
       'artistSocialStats',
       'fetchArtistSocialStats',

@@ -1,0 +1,10 @@
+/*
+ * nuclear-mini-player (third-party) skips tracks through Queue.playTrack and
+ * Playback.nextTrack/previousTrack, which the plugin SDK does not have, so its
+ * previous/next buttons do nothing. The player bar already has working ones.
+ * Remove this once the plugin uses Queue.goToNext/goToPrevious.
+ */
+#nuke-ctrl-prev,
+#nuke-ctrl-next {
+  display: none !important;
+}
