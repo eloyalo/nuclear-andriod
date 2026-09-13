@@ -8,6 +8,7 @@ import { initBridgeHandler } from './services/bridge/bridgeHandler';
 import { registerBuiltInCoreSettings } from './services/coreSettings';
 import { initDiscordHandler } from './services/discordHandler';
 import { initDiscoveryService } from './services/discoveryService';
+import { initFailedTrackSkipper } from './services/failedTrackSkipper';
 import { initHistoryService } from './services/history';
 import { initHttpApiHandler } from './services/httpApi';
 import {
@@ -16,7 +17,9 @@ import {
 } from './services/languageService';
 import { loadMarketplaceThemes } from './services/marketplaceThemeDirService';
 import { initMcpHandler } from './services/mcp';
+import { initMediaSessionHandler } from './services/mediaSessionHandler';
 import { initMpdHandler } from './services/mpd';
+import { initNextTrackPreparation } from './services/nextTrackPreparation';
 import { initPlaybackEventBridge } from './services/playbackEventBridge';
 import { hydratePluginsFromRegistry } from './services/plugins/pluginBootstrap';
 import { ytdlpEnsureInstalled } from './services/tauri/commands';
@@ -27,7 +30,7 @@ import { initializeSettingsStore } from './stores/settingsStore';
 import { initializeShortcutsStore } from './stores/shortcutsStore';
 import { hydrateThemeStore } from './stores/themeStore';
 import { useUpdaterStore } from './stores/updaterStore';
-import { isMobile, skipOnMobile } from './utils/platform';
+import { isAndroid, isMobile, skipOnMobile } from './utils/platform';
 
 export const initPlayerApp = async (
   root: ReturnType<typeof import('react-dom/client').createRoot>,
@@ -47,6 +50,9 @@ export const initPlayerApp = async (
     .then(() => initBridgeHandler())
     .then(skipOnMobile(initDiscordHandler))
     .then(() => initPlaybackEventBridge())
+    .then(() => (isAndroid() ? initMediaSessionHandler() : undefined))
+    .then(() => initNextTrackPreparation())
+    .then(() => initFailedTrackSkipper())
     .then(() => initHistoryService())
     .then(() => applyLanguageFromSettings())
     .then(() => initLanguageWatcher())

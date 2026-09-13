@@ -1,17 +1,38 @@
-import Hls from 'hls.js';
+import Hls, { ErrorData } from 'hls.js';
 import { RefObject, useEffect, useRef } from 'react';
 
+import { isSourceInvalidStatus } from '../fmp4/SegmentFetcher';
+import { SoundError } from '../SoundError';
 import { AudioSource } from '../types';
 
 const canPlayNativeHls = (audio: HTMLAudioElement): boolean =>
   audio.canPlayType('application/vnd.apple.mpegurl') !== '';
 
+export type HlsErrorOutcome = 'ignore' | 'sourceInvalid' | 'playbackError';
+
+export const classifyHlsError = (
+  data: Pick<ErrorData, 'fatal'> & { response?: { code?: number } },
+): HlsErrorOutcome => {
+  if (!data.fatal) {
+    return 'ignore';
+  }
+  const status = data.response?.code;
+  if (status !== undefined && isSourceInvalidStatus(status)) {
+    return 'sourceInvalid';
+  }
+  return 'playbackError';
+};
+
 export const useHlsSource = (
   audioRef: RefObject<HTMLAudioElement | null>,
   src: AudioSource,
+  onError?: (error: Error) => void,
+  onSourceInvalid?: () => void,
 ) => {
   const hlsRef = useRef<Hls | null>(null);
   const prevUrl = useRef<string | null>(null);
+  const callbacksRef = useRef({ onError, onSourceInvalid });
+  callbacksRef.current = { onError, onSourceInvalid };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -44,6 +65,16 @@ export const useHlsSource = (
       // First reported on Discord
       // Reference: https://github.com/video-dev/hls.js/issues/7827
       const hls = new Hls();
+      hls.on(Hls.Events.ERROR, (_event, data: ErrorData) => {
+        const outcome = classifyHlsError(data);
+        if (outcome === 'sourceInvalid') {
+          callbacksRef.current.onSourceInvalid?.();
+        } else if (outcome === 'playbackError') {
+          callbacksRef.current.onError?.(
+            new SoundError('loadFailed', data.details),
+          );
+        }
+      });
       hls.attachMedia(audio);
       hls.loadSource(src.url);
       hlsRef.current = hls;

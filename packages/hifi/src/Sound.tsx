@@ -9,6 +9,18 @@ import { usePlaybackStatus } from './hooks/usePlaybackStatus';
 import { useStartPosition } from './hooks/useStartPosition';
 import { SoundProps } from './types';
 
+const HAVE_NOTHING = 0;
+const MEDIA_ERR_NETWORK = 2;
+const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
+
+const isUnreachableSource = (audio: HTMLAudioElement): boolean => {
+  const code = audio.error?.code;
+  return (
+    audio.readyState === HAVE_NOTHING &&
+    (code === MEDIA_ERR_NETWORK || code === MEDIA_ERR_SRC_NOT_SUPPORTED)
+  );
+};
+
 export const Sound: React.FC<SoundProps> = ({
   src,
   status,
@@ -28,7 +40,7 @@ export const Sound: React.FC<SoundProps> = ({
   useAudioSeek(audioRef, seek);
   useStartPosition(audioRef, src);
   useAudioLoader(audioRef, src);
-  useHlsSource(audioRef, src);
+  useHlsSource(audioRef, src, onError, onSourceInvalid);
   useMseSource(audioRef, src, onError, onSourceInvalid);
   usePlaybackStatus(audioRef, status, src.url, onError);
 
@@ -54,6 +66,22 @@ export const Sound: React.FC<SoundProps> = ({
     onError,
   });
 
+  const handleAudioError = useCallback(
+    (event: React.SyntheticEvent<HTMLAudioElement>) => {
+      const isDirectSource = src.protocol !== 'hls' && src.protocol !== 'mse';
+      if (
+        onSourceInvalid &&
+        isDirectSource &&
+        isUnreachableSource(event.currentTarget)
+      ) {
+        onSourceInvalid();
+        return;
+      }
+      handleError(event);
+    },
+    [src.protocol, onSourceInvalid, handleError],
+  );
+
   return (
     <audio
       ref={audioRef}
@@ -64,7 +92,7 @@ export const Sound: React.FC<SoundProps> = ({
       onEnded={onEnd}
       onLoadStart={handleLoadStart}
       onCanPlay={handleCanPlay}
-      onError={handleError}
+      onError={handleAudioError}
     />
   );
 };

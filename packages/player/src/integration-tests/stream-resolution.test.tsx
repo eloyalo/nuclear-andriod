@@ -334,11 +334,17 @@ describe('Stream Resolution Integration', () => {
                   id: 'cached-yt-id',
                   title: 'Karma Police',
                   failed: false,
-                  source: { provider: 'yt', id: 'cached-yt-id' },
+                  source: {
+                    provider: 'test-streaming-provider',
+                    id: 'cached-yt-id',
+                  },
                   stream: {
                     url: 'https://cached.example.com/karma.m4a?token=old',
                     protocol: 'https',
-                    source: { provider: 'yt', id: 'cached-yt-id' },
+                    source: {
+                      provider: 'test-streaming-provider',
+                      id: 'cached-yt-id',
+                    },
                   },
                   lastResolvedAtIso,
                 },

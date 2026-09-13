@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Nuclear</string>
     <string name="main_activity_title">Nuclear</string>
+    <string name="playback_channel_name">Playback</string>
+    <string name="playback_play">Play</string>
+    <string name="playback_pause">Pause</string>
+    <string name="playback_next">Next</string>
+    <string name="playback_previous">Previous</string>
 </resources>

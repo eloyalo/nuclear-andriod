@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { LoggerProvider, Sound, SoundError } from '@nuclearplayer/hifi';
 import type { TFunction } from '@nuclearplayer/i18n';
 import { useTranslation } from '@nuclearplayer/i18n';
+import type { QueueItem } from '@nuclearplayer/model';
 
 import { useCoreSetting } from '../hooks/useCoreSetting';
 import { eventBus } from '../services/eventBus';
@@ -12,6 +13,8 @@ import { playbackManager } from '../services/playback';
 import { useQueueStore } from '../stores/queueStore';
 import { useSoundStore } from '../stores/soundStore';
 import { errorMessage } from '../utils/errorMessage';
+
+const isResolving = (item: QueueItem): boolean => item.status === 'loading';
 
 const describePlaybackError = (error: Error, t: TFunction): string => {
   if (error instanceof SoundError) {
@@ -53,7 +56,7 @@ export const SoundProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const handleCanPlay = useCallback(() => {
     const currentItem = useQueueStore.getState().getCurrentItem();
-    if (currentItem) {
+    if (currentItem && !isResolving(currentItem)) {
       useQueueStore
         .getState()
         .updateItemState(currentItem.id, { status: 'success' });
@@ -61,18 +64,24 @@ export const SoundProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   const handleSourceInvalid = useCallback(() => {
-    const currentTrack = useQueueStore.getState().getCurrentItem()?.track;
-    if (currentTrack) {
-      eventBus.emit('streamSourceInvalid', currentTrack);
+    const currentItem = useQueueStore.getState().getCurrentItem();
+    if (currentItem && !isResolving(currentItem)) {
+      eventBus.emit('streamSourceInvalid', currentItem.track);
     }
   }, []);
 
   const handleError = useCallback(
     (error: Error) => {
       const message = describePlaybackError(error, t);
+      const currentItem = useQueueStore.getState().getCurrentItem();
+      if (currentItem && isResolving(currentItem)) {
+        Logger.streaming.debug(
+          `Ignoring an error from the previous track's audio: ${message}`,
+        );
+        return;
+      }
       Logger.streaming.error(`Playback error: ${message}`);
 
-      const currentItem = useQueueStore.getState().getCurrentItem();
       if (currentItem) {
         useQueueStore
           .getState()

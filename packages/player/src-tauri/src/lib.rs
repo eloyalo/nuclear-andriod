@@ -10,6 +10,8 @@ pub mod http_api;
 #[cfg(mobile)]
 pub mod innertube;
 pub mod logging;
+#[cfg(mobile)]
+pub mod media_session;
 #[cfg(desktop)]
 pub mod mcp;
 #[cfg(desktop)]
@@ -110,7 +112,9 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
         history::commands::history_first_play_at,
         history::commands::history_top_artists,
         history::commands::history_top_albums,
-        history::commands::history_top_tracks
+        history::commands::history_top_tracks,
+        media_session::media_session_update,
+        media_session::media_session_clear
     ])
 }
 
@@ -151,6 +155,11 @@ pub fn run() {
                 .plugin(tauri_plugin_updater::Builder::new().build())
                 .plugin(tauri_plugin_process::init());
         }
+    }
+
+    #[cfg(mobile)]
+    {
+        builder = builder.plugin(media_session::init());
     }
 
     builder

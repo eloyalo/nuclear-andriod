@@ -5,6 +5,8 @@ import { stripResolutionState } from '@nuclearplayer/model';
 
 import { useQueueStore } from '../../stores/queueStore';
 import { useSoundStore } from '../../stores/soundStore';
+import { errorMessage } from '../../utils/errorMessage';
+import { Logger } from '../logger';
 import { playbackManager } from '../playback';
 import { hasActiveStreamingProvider, streamingHost } from '../streamingHost';
 import { AudioSourceFactory } from './audioSource';
@@ -18,6 +20,7 @@ export type ResolveOptions = {
 export class StreamResolution {
   private activeController: AbortController | null = null;
   private activeItemId: string | null = null;
+  private readonly preparations = new Map<string, Promise<void>>();
 
   constructor(private readonly audioSourceFactory = new AudioSourceFactory()) {}
 
@@ -30,12 +33,18 @@ export class StreamResolution {
     }
     updateItemState(item.id, { status: 'loading', error: undefined });
 
+    await this.preparations.get(item.id);
+    if (signal.aborted) {
+      return;
+    }
+    const latest = useQueueStore.getState().getItemById(item.id) ?? item;
+
     if (!hasActiveStreamingProvider()) {
       this.failItem(item.id, 'streaming:errors.noProviderAvailable');
       return;
     }
 
-    const candidates = await candidatesForTrack(item.track);
+    const candidates = await candidatesForTrack(latest.track);
     if (signal.aborted) {
       return;
     }
@@ -45,9 +54,26 @@ export class StreamResolution {
     }
 
     updateItemState(item.id, {
-      track: { ...item.track, streamCandidates: candidates },
+      track: { ...latest.track, streamCandidates: candidates },
     });
-    await this.tryCandidatesInOrder(item, candidates, signal, options);
+    await this.tryCandidatesInOrder(latest, candidates, signal, options);
+  }
+
+  prepare(item: QueueItem): Promise<void> {
+    const pending = this.preparations.get(item.id);
+    if (pending) {
+      return pending;
+    }
+
+    const preparation = this.prepareStream(item)
+      .catch((error) =>
+        Logger.streaming.warn(
+          `Could not prepare '${item.track.title}': ${errorMessage(error)}`,
+        ),
+      )
+      .finally(() => this.preparations.delete(item.id));
+    this.preparations.set(item.id, preparation);
+    return preparation;
   }
 
   async resolveWithFreshStreams(
@@ -62,6 +88,37 @@ export class StreamResolution {
     };
     useQueueStore.getState().updateItemState(item.id, { track });
     return this.resolve({ ...item, track }, options);
+  }
+
+  private async prepareStream(item: QueueItem): Promise<void> {
+    if (item.status === 'loading' || !hasActiveStreamingProvider()) {
+      return;
+    }
+
+    const candidates = await candidatesForTrack(item.track);
+    const latest = useQueueStore.getState().getItemById(item.id);
+    if (!candidates || !latest) {
+      return;
+    }
+    useQueueStore.getState().updateItemState(item.id, {
+      track: { ...latest.track, streamCandidates: candidates },
+    });
+
+    const candidate = candidates.find((current) => !current.failed);
+    if (!candidate) {
+      return;
+    }
+
+    const resolved = await streamingHost.resolveStreamForCandidate(candidate);
+    if (
+      !resolved ||
+      resolved.failed ||
+      !useQueueStore.getState().getItemById(item.id)
+    ) {
+      return;
+    }
+    useQueueStore.getState().updateCandidate(item.id, resolved);
+    Logger.streaming.debug(`Prepared stream for '${item.track.title}'`);
   }
 
   private async tryCandidatesInOrder(
@@ -132,23 +189,25 @@ export class StreamResolution {
   }
 
   private supersedeActiveResolution(itemId: string): AbortSignal {
-    if (this.activeController) {
-      this.activeController.abort();
-      if (this.activeItemId) {
-        const { getItemById, updateItemState } = useQueueStore.getState();
-        const previousItem = getItemById(this.activeItemId);
-        if (previousItem) {
-          updateItemState(this.activeItemId, {
-            status: undefined,
-            error: undefined,
-            track: stripResolutionState(previousItem.track),
-          });
-        }
+    const previousController = this.activeController;
+    const previousItemId = this.activeItemId;
+    const controller = new AbortController();
+    this.activeController = controller;
+    this.activeItemId = itemId;
+
+    previousController?.abort();
+    if (previousItemId && previousItemId !== itemId) {
+      const { getItemById, updateItemState } = useQueueStore.getState();
+      const previousItem = getItemById(previousItemId);
+      if (previousItem) {
+        updateItemState(previousItemId, {
+          status: undefined,
+          error: undefined,
+          track: stripResolutionState(previousItem.track),
+        });
       }
     }
-    this.activeController = new AbortController();
-    this.activeItemId = itemId;
-    return this.activeController.signal;
+    return controller.signal;
   }
 }
 

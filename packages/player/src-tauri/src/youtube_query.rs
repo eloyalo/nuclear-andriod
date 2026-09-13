@@ -114,8 +114,66 @@ fn codec_from_mime(mime_type: &str) -> Option<String> {
     Some(mime_type[start..start + length].to_string())
 }
 
+const BOT_CHECK_REASON: &str = "not a bot";
+
 pub fn is_bot_check(player: &serde_json::Value) -> bool {
-    player["playabilityStatus"]["status"].as_str() == Some(BOT_CHECK_STATUS)
+    let playability = &player["playabilityStatus"];
+    playability["status"].as_str() == Some(BOT_CHECK_STATUS)
+        && playability["reason"]
+            .as_str()
+            .is_some_and(|reason| reason.contains(BOT_CHECK_REASON))
+}
+
+#[cfg(test)]
+mod is_bot_check_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn login_required(reason: &str) -> serde_json::Value {
+        json!({ "playabilityStatus": { "status": "LOGIN_REQUIRED", "reason": reason } })
+    }
+
+    #[test]
+    fn detects_the_bot_check() {
+        assert!(is_bot_check(&login_required(
+            "Sign in to confirm you’re not a bot"
+        )));
+    }
+
+    #[test]
+    fn does_not_treat_an_age_restricted_video_as_a_bot_check() {
+        assert!(!is_bot_check(&login_required("Sign in to confirm your age")));
+    }
+
+    #[test]
+    fn ignores_playable_videos() {
+        assert!(!is_bot_check(&json!({ "playabilityStatus": { "status": "OK" } })));
+    }
+}
+
+const RATE_LIMIT_MARKER: &str = "google.com/sorry";
+
+pub fn is_rate_limit_block(text: &str) -> bool {
+    text.contains(RATE_LIMIT_MARKER)
+}
+
+#[cfg(test)]
+mod is_rate_limit_block_tests {
+    use super::*;
+
+    #[test]
+    fn detects_the_unusual_traffic_redirect() {
+        let error = "Failed to reach YouTube: error following redirect for url (https://www.google.com/sorry/index?continue=https://www.youtube.com/%3Fhl%3Den&hl=en&q=EgRW)";
+        assert!(is_rate_limit_block(error));
+        assert!(is_rate_limit_block("https://www.google.com/sorry/index?continue=x"));
+    }
+
+    #[test]
+    fn ignores_other_failures() {
+        assert!(!is_rate_limit_block(
+            "Failed to reach YouTube: error sending request for url (https://www.youtube.com/?hl=en)"
+        ));
+    }
 }
 
 pub fn best_audio_from_player(player: &serde_json::Value) -> Result<PlayerAudio, String> {

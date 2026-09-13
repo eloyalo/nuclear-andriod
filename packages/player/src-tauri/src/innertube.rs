@@ -187,13 +187,56 @@ pub async fn search(query: &str, limit: usize) -> Result<Vec<YtdlpSearchResult>,
     Ok(results)
 }
 
+const BLOCK_COOLDOWN: Duration = Duration::from_secs(120);
+
+static BLOCKED_UNTIL: Mutex<Option<std::time::Instant>> = Mutex::const_new(None);
+
+async fn ensure_not_blocked() -> Result<(), String> {
+    let blocked_until = *BLOCKED_UNTIL.lock().await;
+    match blocked_until {
+        Some(until) if until > std::time::Instant::now() => Err(format!(
+            "YouTube is rate limiting this network; not asking again for {}s",
+            until
+                .saturating_duration_since(std::time::Instant::now())
+                .as_secs()
+        )),
+        _ => Ok(()),
+    }
+}
+
+async fn mark_blocked(reason: &str) {
+    warn!(
+        "[innertube] YouTube is blocking requests, pausing stream lookups for {}s: {}",
+        BLOCK_COOLDOWN.as_secs(),
+        reason
+    );
+    *BLOCKED_UNTIL.lock().await = Some(std::time::Instant::now() + BLOCK_COOLDOWN);
+}
+
 async fn fetch_visitor_data(http: &reqwest::Client) -> Result<String, String> {
-    let html = http
+    let response = match http
         .get(HOME_URL)
         .header(reqwest::header::ACCEPT_LANGUAGE, "en-US,en;q=0.9")
         .send()
         .await
-        .map_err(|error| format!("Failed to reach YouTube: {}", error))?
+    {
+        Ok(response) => response,
+        Err(error) => {
+            let message = format!("Failed to reach YouTube: {}", error);
+            if crate::youtube_query::is_rate_limit_block(&message) {
+                mark_blocked(&message).await;
+            }
+            return Err(message);
+        }
+    };
+
+    if crate::youtube_query::is_rate_limit_block(response.url().as_str()) {
+        let message = format!("YouTube redirected to {}", response.url());
+        mark_blocked(&message).await;
+        return Err(message);
+    }
+
+    let html = response
         .text()
         .await
         .map_err(|error| format!("Failed to read YouTube home page: {}", error))?;
@@ -255,6 +298,7 @@ async fn request_player(
 pub async fn get_stream(url: &str) -> Result<YtdlpStreamInfo, String> {
     let video_id = video_id_from_url(url);
     let http = http_client()?;
+    ensure_not_blocked().await?;
     debug!("[innertube] Getting stream for: {}", video_id);
 
     let mut last_error = String::new();
@@ -295,5 +339,6 @@ pub async fn get_stream(url: &str) -> Result<YtdlpStreamInfo, String> {
     }
 
     error!("[innertube] Giving up on {}: {}", video_id, last_error);
+    mark_blocked(&last_error).await;
     Err(last_error)
 }
