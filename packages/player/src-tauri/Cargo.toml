@@ -57,6 +57,16 @@ discord-rich-presence = "1.1.0"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
 
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+# yt-dlp can't run on mobile; search and streams go through rustypipe instead.
+# Pinned to a git rev: the 0.11.4 release panics fetching visitor data.
+# See ANDROID_PLAYBACK.md §4.
+rustypipe = { git = "https://codeberg.org/ThetaDev/rustypipe", rev = "c93bafd8", default-features = false, features = ["rustls-tls-webpki-roots"] }
+# rquickjs ships no prebuilt bindings for Android targets, so they're generated
+# at build time. Needs libclang and BINDGEN_EXTRA_CLANG_ARGS_<target> pointing
+# at the NDK sysroot; see ANDROID_PLAYBACK.md §6.
+rquickjs = { version = "0.9", features = ["bindgen"] }
+
 [target.'cfg(target_os = "android")'.dependencies]
 # reqwest's default certificate verifier needs a JVM Context on Android; we give
 # it a rustls config with the webpki roots baked in instead. See src/tls.rs.

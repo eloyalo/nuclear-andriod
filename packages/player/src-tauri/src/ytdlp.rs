@@ -162,6 +162,15 @@ pub async fn ytdlp_search(
     let limit = max_results.unwrap_or(10);
     debug!("[yt-dlp] Searching: {} (limit: {})", query, limit);
 
+    #[cfg(mobile)]
+    return crate::innertube::search(&query, limit as usize).await;
+
+    #[cfg(desktop)]
+    search_with_ytdlp(&query, limit)
+}
+
+#[cfg(desktop)]
+fn search_with_ytdlp(query: &str, limit: u32) -> Result<Vec<YtdlpSearchResult>, String> {
     let search_url = format!("ytsearch{}:{}", limit, query);
     let stdout = run_ytdlp(&[
         "--dump-json",
@@ -208,6 +217,15 @@ pub async fn ytdlp_get_stream(
 
     debug!("[yt-dlp] Getting stream for: {}", resolved_url);
 
+    #[cfg(mobile)]
+    return crate::innertube::get_stream(&resolved_url).await;
+
+    #[cfg(desktop)]
+    get_stream_with_ytdlp(&resolved_url)
+}
+
+#[cfg(desktop)]
+fn get_stream_with_ytdlp(resolved_url: &str) -> Result<YtdlpStreamInfo, String> {
     let stdout = run_ytdlp(&[
         "-f",
         "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio",

@@ -15,6 +15,7 @@ import {
   useSettingsModalStore,
   type SettingsTab,
 } from '../stores/settingsModalStore';
+import { isMobile } from '../utils/platform';
 import { KeyboardShortcuts } from '../views/KeyboardShortcuts';
 import { Logs } from '../views/Logs/Logs';
 import { Plugins } from '../views/Plugins/Plugins';
@@ -63,7 +64,10 @@ export const ConnectedSettingsModal: FC = () => {
   const { isOpen, close, activeTab, setActiveTab, isNavOpen, setNavOpen } =
     useSettingsModalStore();
 
-  const tabs = SETTINGS_TABS.map((tab) => ({
+  const tabs = SETTINGS_TABS.filter(
+    // Phones have no keyboard to bind anything to.
+    (tab) => !(tab.id === 'shortcuts' && isMobile()),
+  ).map((tab) => ({
     ...tab,
     label: t(`${tab.id}.title`),
   }));

@@ -8,6 +8,7 @@ import { getSetting, useSettingsStore } from '../stores/settingsStore';
 import { errorMessage } from '../utils/errorMessage';
 import { Logger } from './logger';
 import { providersHost } from './providersHost';
+import { rankCandidates } from './streamResolution/rankCandidates';
 
 const getActiveStreamingProvider = (): StreamingProvider | undefined =>
   providersHost.get<StreamingProvider>(
@@ -79,7 +80,7 @@ export const createStreamingHost = (): StreamingHost => ({
 
       return {
         success: true,
-        candidates,
+        candidates: rankCandidates(track, candidates),
       };
     } catch (error) {
       Logger.streaming.error(

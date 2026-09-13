@@ -1,5 +1,6 @@
+import { useClose } from '@headlessui/react';
 import { cva, VariantProps } from 'class-variance-authority';
-import { ComponentProps, FC, ReactNode } from 'react';
+import { ComponentProps, FC, MouseEvent, ReactNode } from 'react';
 
 import { cn } from '../../utils';
 
@@ -41,13 +42,29 @@ export const PopoverItem: FC<PopoverItemProps> = ({
   highlight,
   icon,
   children,
+  onClick,
   ...props
-}) => (
-  <button
-    className={cn(popoverItemVariants({ intent, align, highlight, className }))}
-    {...props}
-  >
-    <span className="w-4 shrink-0">{icon}</span>
-    <span>{children}</span>
-  </button>
-);
+}) => {
+  // A plain button inside a PopoverPanel doesn't dismiss the popover. Items
+  // that open a dialog would leave the panel floating above it, swallowing the
+  // first click on the dialog. Outside a Popover this is a no-op.
+  const close = useClose();
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event);
+    close();
+  };
+
+  return (
+    <button
+      className={cn(
+        popoverItemVariants({ intent, align, highlight, className }),
+      )}
+      onClick={handleClick}
+      {...props}
+    >
+      <span className="w-4 shrink-0">{icon}</span>
+      <span>{children}</span>
+    </button>
+  );
+};

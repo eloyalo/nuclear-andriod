@@ -55,7 +55,7 @@ const PopoverImpl: FC<PopoverProps> = ({
                 {backdrop && (
                   <PopoverBackdrop
                     transition
-                    className="bg-overlay fixed inset-0 transition duration-150 ease-out data-closed:opacity-0"
+                    className="bg-overlay fixed inset-0 z-50 transition duration-150 ease-out data-closed:opacity-0"
                   />
                 )}
                 <PopoverPanel
@@ -65,7 +65,11 @@ const PopoverImpl: FC<PopoverProps> = ({
                   animate={{ opacity: 1, y: 8, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.98 }}
                   className={cn(
-                    'surface-popover border-border rounded-md border-(length:--border-width) px-4 py-2 leading-5 backdrop-blur-xl select-none',
+                    // Anchored panels are portalled to the body with z-index
+                    // auto, which puts them *under* the overlay drawers of the
+                    // compact layout (z-40) — the menu shows but swallows no
+                    // clicks. Lift it to the dialog layer.
+                    'surface-popover border-border z-50 rounded-md border-(length:--border-width) px-4 py-2 leading-5 backdrop-blur-xl select-none',
                     panelClassName,
                     {
                       ['translate-y-0']: anchor === 'bottom',

@@ -1,5 +1,17 @@
 [
   {
+    "date": "2026-09-12T00:00",
+    "description": "Streaming now plays the version that matches the track: results with the right duration and title come first, and live, cover and remix versions are skipped unless the track itself is one.",
+    "type": "improvement",
+    "contributors": ["eloyalo"],
+    "tags": [
+      {
+        "label": "Playback",
+        "color": "green"
+      }
+    ]
+  },
+  {
     "date": "2026-09-01T00:00",
     "description": "Theming system v2: themes can now use gradients on surfaces, and a whole new group of variables to make Nuclear more customizable. See the docs and release notes for details.",
     "type": "feature",

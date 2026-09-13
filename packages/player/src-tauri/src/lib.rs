@@ -7,6 +7,8 @@ pub mod history;
 pub mod http;
 #[cfg(desktop)]
 pub mod http_api;
+#[cfg(mobile)]
+pub mod innertube;
 pub mod logging;
 #[cfg(desktop)]
 pub mod mcp;
@@ -17,6 +19,8 @@ pub mod pagination;
 mod setup;
 pub mod stream_server;
 pub mod tls;
+#[cfg_attr(desktop, allow(dead_code))]
+pub mod youtube_query;
 pub mod ytdlp;
 // yt-dlp is shipped as a downloaded binary, which Android doesn't allow us to
 // execute. See ANDROID_PORT.md 3.1 for the replacement plan.
@@ -156,6 +160,9 @@ pub fn run() {
             bridge::init_bridge(app.handle().clone());
             stream_server::init_stream_server(app.handle().clone());
             history::init_history(app.handle().clone());
+
+            #[cfg(mobile)]
+            innertube::init_innertube(app.handle().clone());
 
             #[cfg(desktop)]
             {
