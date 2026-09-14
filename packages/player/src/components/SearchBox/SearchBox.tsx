@@ -35,6 +35,7 @@ export const SearchBox: FC = () => {
         placeholder={t('placeholder')}
         tone="secondary"
         className="h-8 px-8"
+        enterKeyHint="search"
       />
       {query.length > 0 && (
         <Button
