@@ -6,12 +6,15 @@ backend almost entirely — the changes are about what had to be swapped out,
 guarded, or added to make the same app run inside an Android WebView and
 process instead of a desktop window.
 
-**Status: functional on the emulator.** The app installs, plays music from
-several sources including YouTube, keeps playing in the background with a
-real notification and lock-screen controls, and has a phone-sized layout.
-Everything below is measured on the `nuclear_api36` x86_64 emulator; nothing
-has been tested yet on a physical device (no `aarch64` build exists yet —
-that's the main thing standing between this and a real install).
+**Status: working, on the emulator and on a real phone.** The app installs,
+plays music from several sources including YouTube, keeps playing in the
+background with a real notification and lock-screen controls, and has a
+phone-sized layout. Most of the measurements below come from the
+`nuclear_api36` x86_64 emulator, but the build has also gone on a physical
+Android 13 device: Bluetooth output, screen-locked playback, notification
+controls — all worked, no crashes. That pass was quick and not exhaustive,
+so treat the emulator numbers as the detailed evidence and the phone as
+confirmation the same behavior holds on real hardware.
 
 ## Architecture, unchanged
 
@@ -203,10 +206,13 @@ notification and external controls (simulated via `adb`, not real hardware),
 desktop is unaffected (691 player tests, `ui` tests, type-check and lint all
 still pass).
 
+**Verified on a physical Android 13 phone:** Bluetooth audio output,
+playback with the screen locked, and notification/lock-screen controls — all
+worked on a first quick pass, no crashes. Doze, manufacturer battery
+optimization over longer stretches, and incoming calls haven't been tried
+yet.
+
 **Not yet done:**
-- **No physical-device testing at all** — Bluetooth, real lock screen, Doze,
-  manufacturer battery optimization, and incoming calls are all unverified.
-  Needs an `aarch64` build, which doesn't exist yet.
 - No signed release build; the debug APK is ~600MB (debug symbols).
 - `youtube-playlists` plugin can't work (no playlist replacement).
 - `nuclear-plugin-youtube` and NetEase streaming should work via the same
@@ -225,10 +231,10 @@ emulator -avd nuclear_api36 &
 pnpm --filter @nuclearplayer/player tauri android dev   # hot-reload, like desktop `tauri dev`
 ```
 
-or build just the APK:
+or build just the APK — `x86_64` for the emulator, `aarch64` for a real phone:
 
 ```fish
-pnpm --filter @nuclearplayer/player tauri android build --debug --apk --target x86_64
+pnpm --filter @nuclearplayer/player tauri android build --debug --apk --target aarch64
 adb install -r packages/player/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
 ```
 
