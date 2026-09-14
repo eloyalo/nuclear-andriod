@@ -14,3 +14,5 @@ test-results
 flatpak/pnpm-sources.json
 flatpak/cargo-sources.json
 flatpak/.flatpak-cargo-generator.py
+
+/android-builds/

@@ -20,6 +20,16 @@
   
 </div>
 
+> [!NOTE]
+> **This is an unofficial fork focused on porting Nuclear to Android.** It isn't affiliated with or merged into the original project — Nuclear's [contributing guide](https://docs.nuclearplayer.com/development/contributing) doesn't accept code contributions, so this exists as a separate, visible piece of work rather than a pull request.
+>
+> - 📖 What changed, why, and what's still open: [ANDROID_PORT.md](ANDROID_PORT.md)
+> - 📱 Download the Android APK: [Releases](../../releases)
+> - 🐛 Found an Android-specific bug? Open it on [this fork's issue tracker](../../issues), not upstream's.
+> - 🖥️ For the desktop app (Windows/macOS/Linux) and everything else Nuclear does, go to [nukeop/nuclear](https://github.com/nukeop/nuclear).
+>
+> Status: works on an emulator and on a physical Android 13 phone — search, streaming (including YouTube), background playback with lock-screen controls. Unsigned debug build for now.
+
 ## Screenshots
 
 <p align="center">
@@ -52,13 +62,12 @@ Nuclear comes with multiple built-in themes:
 
 ## Download
 
-Grab the latest release for your platform from the [Releases page](https://github.com/nukeop/nuclear/releases).
-
-| Platform | Formats |
-|----------|---------|
-| Windows | `.exe` installer, `.msi` |
-| macOS | `.dmg` (Apple Silicon and Intel) |
-| Linux | `.AppImage`, `.deb`, `.rpm`, `.flatpak` |
+| Platform | Formats | Source |
+|----------|---------|--------|
+| Android | `.apk` (unsigned debug build) | [This fork's Releases page](../../releases) |
+| Windows | `.exe` installer, `.msi` | [Official Releases page](https://github.com/nukeop/nuclear/releases) |
+| macOS | `.dmg` (Apple Silicon and Intel) | [Official Releases page](https://github.com/nukeop/nuclear/releases) |
+| Linux | `.AppImage`, `.deb`, `.rpm`, `.flatpak` | [Official Releases page](https://github.com/nukeop/nuclear/releases) |
 
 ## Features
 
