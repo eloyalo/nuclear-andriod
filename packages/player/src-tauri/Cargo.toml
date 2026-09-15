@@ -12,6 +12,18 @@ rust-version = "1.77.2"
 name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+# Applies to every platform's release build (Cargo profiles aren't
+# per-target) — the Android .so is the main reason for these settings, but
+# desktop release builds get smaller too, at the cost of longer compile
+# times. panic="abort" was deliberately left out: Tauri's mobile runtime
+# crosses the JNI boundary, and unwinding behavior there wasn't verified
+# safe to change. See docs/apk-reducir-tamano-15-09-2026.md.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+
 [build-dependencies]
 tauri-build = { version = "2.3.1", features = [] }
 
