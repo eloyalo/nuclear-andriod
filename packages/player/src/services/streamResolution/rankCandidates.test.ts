@@ -137,6 +137,25 @@ describe('rankCandidates', () => {
     expect(rankedIds(track('DESPECHÁ', 157_000), candidates)[0]).toBe('match');
   });
 
+  it('rejects a candidate whose duration is grossly longer than the track (e.g. a compilation video)', () => {
+    const candidates = [
+      candidate('compilation', 'XXXTENTACION - Rare (Full Album Mix)', 565),
+      candidate('right-song', 'XXXTENTACION - Rare', 95),
+    ];
+
+    expect(
+      rankedIds(track('Rare', 95_000, 'XXXTENTACION'), candidates),
+    ).toEqual(['right-song']);
+  });
+
+  it('rejects an over-long candidate even when it is the only result', () => {
+    const candidates = [candidate('compilation', 'XXXTENTACION - Rare', 565)];
+
+    expect(
+      rankedIds(track('Rare', 95_000, 'XXXTENTACION'), candidates),
+    ).toEqual([]);
+  });
+
   it("demotes other artists' versions of the same song", () => {
     const candidates = [
       candidate('panic', 'Panic! At The Disco - Bohemian Rhapsody', 362),

@@ -2,6 +2,15 @@ import type { StreamCandidate, Track } from '@nuclearplayer/model';
 
 const DURATION_TOLERANCE_MS = 7000;
 
+// A candidate is rejected outright (not just ranked lower) once its duration
+// drifts this far from the track's — in both absolute and relative terms —
+// so a short track can't be matched to a long compilation/loop video just
+// because nothing else scored worse. The floor keeps very short tracks from
+// being rejected by a tiny absolute gap; the ratio keeps very long tracks
+// from being rejected by a proportionally small one.
+const DURATION_REJECT_FLOOR_MS = 45_000;
+const DURATION_REJECT_RATIO = 0.35;
+
 const DURATION_CLOSE = 0;
 const DURATION_UNKNOWN = 1;
 const DURATION_FAR = 2;
@@ -25,6 +34,19 @@ const VARIANT_KEYWORDS = [
   'bass boosted',
   'reaction',
   'tutorial',
+  'full album',
+  'album completo',
+  'compilation',
+  'compilado',
+  'megamix',
+  'mixtape',
+  'greatest hits',
+  'grandes exitos',
+  'best of',
+  'hour loop',
+  'hours loop',
+  'hour version',
+  'no copyright',
 ];
 
 const normalize = (text: string): string =>
@@ -75,11 +97,27 @@ const durationRank = (track: Track, candidate: StreamCandidate): number => {
   return difference <= DURATION_TOLERANCE_MS ? DURATION_CLOSE : DURATION_FAR;
 };
 
+const isDurationRejected = (
+  track: Track,
+  candidate: StreamCandidate,
+): boolean => {
+  if (track.durationMs === undefined || candidate.durationMs === undefined) {
+    return false;
+  }
+  const difference = Math.abs(track.durationMs - candidate.durationMs);
+  const threshold = Math.max(
+    DURATION_REJECT_FLOOR_MS,
+    track.durationMs * DURATION_REJECT_RATIO,
+  );
+  return difference > threshold;
+};
+
 export const rankCandidates = (
   track: Track,
   candidates: StreamCandidate[],
 ): StreamCandidate[] =>
   candidates
+    .filter((candidate) => !isDurationRejected(track, candidate))
     .map((candidate) => {
       const candidateTitle = normalize(candidate.title);
       return {
