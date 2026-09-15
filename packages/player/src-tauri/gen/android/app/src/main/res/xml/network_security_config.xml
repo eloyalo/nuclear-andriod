@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nuclear's local audio proxy (stream_server.rs) always serves over
+  http://127.0.0.1:<port>. The release build type blocks cleartext
+  traffic globally (usesCleartextTraffic="false" in build.gradle.kts),
+  which also blocks this loopback-only proxy and breaks playback. This
+  domain-config carves out an exception for loopback only; every other
+  destination stays on the base policy (cleartext blocked in release,
+  allowed in debug).
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
