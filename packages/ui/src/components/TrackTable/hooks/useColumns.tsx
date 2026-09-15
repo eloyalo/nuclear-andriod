@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import { pickArtwork, Track } from '@nuclearplayer/model';
 
+import { useIsCompactLayout } from '../../../hooks/useIsCompactLayout';
 import { formatTimeMillis } from '../../../utils/time';
 import { FavoriteCell } from '../Cells/FavoriteCell';
 import { PositionCell } from '../Cells/PositionCell';
@@ -20,6 +21,7 @@ export function useColumns<T extends Track = Track>(
 ): ColumnDef<T>[] {
   const { display, labels, actions } = props;
   const columnHelper = createColumnHelper<T>();
+  const isCompact = useIsCompactLayout();
 
   const showFavorite =
     display?.displayFavorite && Boolean(actions?.onToggleFavorite);
@@ -34,6 +36,7 @@ export function useColumns<T extends Track = Track>(
           cell: FavoriteCell,
         }),
       display?.displayPosition &&
+        !isCompact &&
         columnHelper.accessor((track) => track.trackNumber, {
           id: 'position',
           enableSorting: true,
@@ -52,14 +55,19 @@ export function useColumns<T extends Track = Track>(
             enableSorting: false,
           },
         ),
-      columnHelper.accessor((track) => track.artists[0].name, {
-        id: 'artist',
-        enableSorting: true,
-        header: (context) => (
-          <TextHeader context={context}>{labels.headers.artist}</TextHeader>
-        ),
-        cell: TextCell,
-      }),
+      // On a phone, the title column is what doubles as the play target and
+      // needs most of the row's width, so the artist/album/duration columns
+      // (which would otherwise split that space evenly with it under
+      // table-fixed) are dropped and only the title column is left flexible.
+      !isCompact &&
+        columnHelper.accessor((track) => track.artists[0].name, {
+          id: 'artist',
+          enableSorting: true,
+          header: (context) => (
+            <TextHeader context={context}>{labels.headers.artist}</TextHeader>
+          ),
+          cell: TextCell,
+        }),
       columnHelper.accessor((track) => track.title, {
         id: 'title',
         enableSorting: true,
@@ -69,6 +77,7 @@ export function useColumns<T extends Track = Track>(
         cell: TitleCell,
       }),
       display?.displayAlbum &&
+        !isCompact &&
         columnHelper.accessor((track) => track.album?.title, {
           id: 'album',
           enableSorting: true,
@@ -78,6 +87,7 @@ export function useColumns<T extends Track = Track>(
           cell: TextCell,
         }),
       display?.displayDuration &&
+        !isCompact &&
         columnHelper.accessor((track) => formatTimeMillis(track.durationMs), {
           id: 'duration',
           enableSorting: true,
@@ -93,7 +103,7 @@ export function useColumns<T extends Track = Track>(
           cell: RemoveCell,
         }),
     ],
-    [labels, display, showFavorite, showDelete],
+    [labels, display, showFavorite, showDelete, isCompact],
   ).filter(Boolean) as ColumnDef<T>[];
 
   return columns;

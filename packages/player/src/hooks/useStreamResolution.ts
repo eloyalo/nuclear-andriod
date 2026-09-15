@@ -13,7 +13,12 @@ const buildResolutionKey = (item: QueueItem): string => {
 
 export const useStreamResolution = (): void => {
   const resolutionKeyRef = useRef<string | null>(null);
-  const isFirstResolutionRef = useRef(true);
+  // Only suppress autoplay for a queue item that was already current when
+  // this hook mounted (a persisted queue restored on startup). If the queue
+  // starts empty, the user's first manual play should autoplay normally.
+  const isFirstResolutionRef = useRef(
+    Boolean(useQueueStore.getState().getCurrentItem()),
+  );
 
   useStreamRecovery();
 

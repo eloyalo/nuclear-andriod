@@ -12,7 +12,13 @@ export const FlatpakWarningBanner: FC = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const wasDismissed = localStorage.getItem(DISMISSED_KEY) === 'true';
+    let wasDismissed = false;
+    try {
+      wasDismissed = localStorage.getItem(DISMISSED_KEY) === 'true';
+    } catch {
+      // localStorage can be unavailable or throw (restricted WebView
+      // contexts, privacy settings); treat that the same as "not dismissed".
+    }
     if (wasDismissed) {
       return;
     }
@@ -27,7 +33,11 @@ export const FlatpakWarningBanner: FC = () => {
   }, []);
 
   const dismiss = () => {
-    localStorage.setItem(DISMISSED_KEY, 'true');
+    try {
+      localStorage.setItem(DISMISSED_KEY, 'true');
+    } catch {
+      // Best-effort; worst case the banner reappears next launch.
+    }
     setVisible(false);
   };
 

@@ -131,6 +131,7 @@ exports[`Sources view > (Snapshot) renders the view 1`] = `
               class="border-border focus-visible:ring-ring focus-visible:ring-offset-muted w-full transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none surface-background text-foreground placeholder:text-foreground/60 rounded-md border-(length:--border-width) h-8 px-8"
               data-headlessui-state=""
               data-testid="search-box"
+              enterkeyhint="search"
               id="input-:r0:"
               placeholder="Search"
               type="text"

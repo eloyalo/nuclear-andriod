@@ -130,6 +130,7 @@ exports[`Search view > (Snapshot) renders the search view 1`] = `
               data-headlessui-state="hover"
               data-hover=""
               data-testid="search-box"
+              enterkeyhint="search"
               id="input-:r0:"
               placeholder="Search"
               type="text"

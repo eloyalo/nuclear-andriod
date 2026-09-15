@@ -404,7 +404,7 @@ exports[`FavoriteTracks view > (Snapshot) renders with tracks 1`] = `
                             >
                               <button
                                 aria-label="Add to queue"
-                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100"
+                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
                                 data-headlessui-state=""
                                 data-testid="add-to-queue-button"
                                 type="button"
@@ -434,7 +434,7 @@ exports[`FavoriteTracks view > (Snapshot) renders with tracks 1`] = `
                                 aria-expanded="false"
                                 aria-haspopup="menu"
                                 aria-label="Track options"
-                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100"
+                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
                                 data-headlessui-state=""
                                 data-state="closed"
                                 data-testid="track-context-menu-button"
@@ -549,7 +549,7 @@ exports[`FavoriteTracks view > (Snapshot) renders with tracks 1`] = `
                             >
                               <button
                                 aria-label="Add to queue"
-                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100"
+                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
                                 data-headlessui-state=""
                                 data-testid="add-to-queue-button"
                                 type="button"
@@ -579,7 +579,7 @@ exports[`FavoriteTracks view > (Snapshot) renders with tracks 1`] = `
                                 aria-expanded="false"
                                 aria-haspopup="menu"
                                 aria-label="Track options"
-                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100"
+                                class="inline-flex cursor-pointer items-center rounded-md whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 size-8 justify-center opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
                                 data-headlessui-state=""
                                 data-state="closed"
                                 data-testid="track-context-menu-button"

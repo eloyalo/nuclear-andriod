@@ -67,7 +67,7 @@ const PopoverImpl: FC<PopoverProps> = ({
                   className={cn(
                     // Anchored panels are portalled to the body with z-index
                     // auto, which puts them *under* the overlay drawers of the
-                    // compact layout (z-40) — the menu shows but swallows no
+                    // compact layout (z-[45]) — the menu shows but swallows no
                     // clicks. Lift it to the dialog layer.
                     'surface-popover border-border z-50 rounded-md border-(length:--border-width) px-4 py-2 leading-5 backdrop-blur-xl select-none',
                     panelClassName,

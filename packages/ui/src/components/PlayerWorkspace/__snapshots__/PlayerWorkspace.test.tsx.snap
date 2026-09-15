@@ -215,7 +215,7 @@ exports[`PlayerWorkspace > compact layout > (Snapshot) renders the sidebars as o
   >
     <div
       animate="[object Object]"
-      class="absolute inset-0 z-30 bg-black/50"
+      class="absolute inset-0 z-[35] bg-black/50"
       data-testid="sidebar-backdrop-left"
       exit="[object Object]"
       initial="[object Object]"
@@ -223,7 +223,7 @@ exports[`PlayerWorkspace > compact layout > (Snapshot) renders the sidebars as o
     <div
       animate="[object Object]"
       aria-hidden="false"
-      class="border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden surface-sidebar-left left-0 border-r-(length:--border-width) p-2"
+      class="border-border absolute inset-y-0 z-[45] flex w-[min(85vw,20rem)] flex-col overflow-hidden surface-sidebar-left left-0 border-r-(length:--border-width) p-2"
       data-testid="sidebar-drawer-left"
       transition="[object Object]"
     >
@@ -273,7 +273,7 @@ exports[`PlayerWorkspace > compact layout > (Snapshot) renders the sidebars as o
     <div
       animate="[object Object]"
       aria-hidden="true"
-      class="border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2 surface-sidebar-right right-0 border-l-(length:--border-width) pointer-events-none"
+      class="border-border absolute inset-y-0 z-[45] flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2 surface-sidebar-right right-0 border-l-(length:--border-width) pointer-events-none"
       data-testid="sidebar-drawer-right"
       transition="[object Object]"
     >

@@ -24,7 +24,7 @@ const AddToQueueButton: FC<AddToQueueButtonProps> = ({ label, onClick }) => (
     data-testid="add-to-queue-button"
     size="icon-sm"
     variant="text"
-    className="opacity-0 transition-none group-hover:opacity-100"
+    className="opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
     onClick={(e) => {
       e.stopPropagation();
       onClick();
@@ -48,7 +48,7 @@ const ContextMenuButton = forwardRef<HTMLElement, ContextMenuButtonProps>(
         data-testid="track-context-menu-button"
         size="icon-sm"
         variant="text"
-        className="opacity-0 transition-none group-hover:opacity-100"
+        className="opacity-0 transition-none group-hover:opacity-100 max-sm:opacity-100"
         onClick={(e) => e.stopPropagation()}
         aria-label={label}
       >

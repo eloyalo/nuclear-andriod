@@ -79,6 +79,9 @@ describe('Stream Resolution Integration', () => {
       const currentItem = StreamResolutionWrapper.getCurrentQueueItem();
       expect(currentItem?.status).toBe('success');
       expect(currentItem?.track.streamCandidates).toHaveLength(1);
+      // Regression: the first track added to an empty queue must autoplay,
+      // not just resolve and sit loaded-but-paused.
+      expect(useSoundStore.getState().status).toBe('playing');
     });
 
     it('shows loading state while resolving stream', async () => {

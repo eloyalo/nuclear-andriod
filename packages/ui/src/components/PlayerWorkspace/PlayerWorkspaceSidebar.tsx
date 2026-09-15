@@ -102,7 +102,11 @@ export const PlayerWorkspaceSidebar: FC<PlayerWorkspaceSidebarProps> = ({
             <motion.div
               key={`sidebar-backdrop-${side}`}
               data-testid={`sidebar-backdrop-${side}`}
-              className="absolute inset-0 z-30 bg-black/50"
+              // z-[35], not the more common z-30: third-party plugin panels
+              // (e.g. nuclear-mini-player) render arbitrary DOM outside this
+              // app's own stacking scale, and this needs to sit above the
+              // ones that don't set their own extreme z-index.
+              className="absolute inset-0 z-[35] bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -115,7 +119,7 @@ export const PlayerWorkspaceSidebar: FC<PlayerWorkspaceSidebarProps> = ({
           data-testid={`sidebar-drawer-${side}`}
           aria-hidden={isCollapsed}
           className={cn(
-            'border-border absolute inset-y-0 z-40 flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2',
+            'border-border absolute inset-y-0 z-[45] flex w-[min(85vw,20rem)] flex-col overflow-hidden p-2',
             {
               'surface-sidebar-left left-0 border-r-(length:--border-width)':
                 side === 'left',
