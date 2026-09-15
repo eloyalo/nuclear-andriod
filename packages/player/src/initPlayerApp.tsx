@@ -75,4 +75,23 @@ export const initPlayerApp = async (
       <App />
     </React.StrictMode>,
   );
+
+  signalBootCompleteToAndroidWatchdog();
+};
+
+// MainActivity.kt starts a timer as soon as the webview is created and
+// restarts the whole app if this never fires — see the comment above
+// `installBootWatchdog` there for why: on some cold starts on Android, the
+// Tauri IPC bridge comes up dead (every invoke() hangs forever, even one for
+// a command that doesn't exist), so we never reach this line, and a plain
+// page reload doesn't recover it — only a full process restart does. This
+// interface deliberately bypasses Tauri's own IPC so it still works when
+// that's the thing that's broken. A no-op everywhere else (desktop, iOS,
+// tests), since the bridge is only ever injected on Android.
+const signalBootCompleteToAndroidWatchdog = () => {
+  (
+    window as unknown as {
+      __nuclearBootWatchdog?: { signalBootComplete?: () => void };
+    }
+  ).__nuclearBootWatchdog?.signalBootComplete?.();
 };
