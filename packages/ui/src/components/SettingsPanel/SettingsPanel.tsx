@@ -6,26 +6,32 @@ import { useIsCompactLayout } from '../../hooks/useIsCompactLayout';
 import { Button } from '../Button';
 import { DialogRoot } from '../Dialog/DialogRoot';
 import { SettingsPanelContent } from './SettingsPanelContent';
-import { SettingsPanelNav } from './SettingsPanelNav';
+import { SettingsPanelNavigation } from './SettingsPanelNavigation';
 
-export type SettingsTab = {
+export type SettingsNavigationItem = {
   id: string;
   label: string;
-  icon: ReactNode;
-  content: () => ReactNode;
+  icon?: ReactNode;
+};
+
+export type SettingsNavigationSection = {
+  id: string;
+  label: string;
+  items: SettingsNavigationItem[];
+  activeItemId: string | null;
+  onSelect: (itemId: string) => void;
 };
 
 type SettingsPanelProps = {
   isOpen: boolean;
   onClose: () => void;
-  tabs: SettingsTab[];
-  activeTab: string;
-  onTabChange: (tabId: string) => void;
-  navFooter?: ReactNode;
+  sections: SettingsNavigationSection[];
+  navigationFooter?: ReactNode;
+  children: ReactNode;
   /**
-   * Phone-width only: the tab list becomes a drawer behind a hamburger, so its
-   * open state is controlled from outside to let the Android back button close
-   * it before the panel itself.
+   * Phone-width only: the navigation becomes a drawer behind a hamburger, so
+   * its open state is controlled from outside to let the Android back button
+   * close it before the panel itself.
    */
   isNavOpen?: boolean;
   onNavOpenChange?: (isOpen: boolean) => void;
@@ -35,19 +41,28 @@ type SettingsPanelProps = {
 export const SettingsPanel: FC<SettingsPanelProps> = ({
   isOpen,
   onClose,
-  tabs,
-  activeTab,
-  onTabChange,
-  navFooter,
+  sections,
+  navigationFooter,
+  children,
   isNavOpen = false,
   onNavOpenChange,
   navLabel,
 }) => {
   const isCompact = useIsCompactLayout();
-  const active = tabs.find((tab) => tab.id === activeTab);
-  const activeTabContent = active?.content;
+  const activeItemId = sections[0]?.activeItemId ?? null;
+  const activeItem = sections
+    .flatMap((section) => section.items)
+    .find((item) => item.id === activeItemId);
 
   if (isCompact) {
+    const closingSections = sections.map((section) => ({
+      ...section,
+      onSelect: (itemId: string) => {
+        section.onSelect(itemId);
+        onNavOpenChange?.(false);
+      },
+    }));
+
     return (
       <DialogRoot
         isOpen={isOpen}
@@ -69,14 +84,12 @@ export const SettingsPanel: FC<SettingsPanelProps> = ({
             className="truncate font-bold"
             data-testid="settings-active-tab"
           >
-            {active?.label}
+            {activeItem?.label}
           </span>
         </header>
 
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-          <SettingsPanelContent>
-            {activeTabContent && activeTabContent()}
-          </SettingsPanelContent>
+          <SettingsPanelContent>{children}</SettingsPanelContent>
 
           <AnimatePresence>
             {isNavOpen && (
@@ -104,14 +117,9 @@ export const SettingsPanel: FC<SettingsPanelProps> = ({
               mass: 0.8,
             }}
           >
-            <SettingsPanelNav
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={(tabId) => {
-                onTabChange(tabId);
-                onNavOpenChange?.(false);
-              }}
-              footer={navFooter}
+            <SettingsPanelNavigation
+              sections={closingSections}
+              footer={navigationFooter}
               className="surface-background w-[min(80vw,16rem)]"
             />
           </motion.div>
@@ -124,17 +132,10 @@ export const SettingsPanel: FC<SettingsPanelProps> = ({
     <DialogRoot
       isOpen={isOpen}
       onClose={onClose}
-      className="flex h-[80vh] max-h-[900px] w-[80vw] max-w-6xl p-0"
+      className="narrow:inset-0 narrow:rounded-none narrow:border-0 fixed inset-8 flex w-auto max-w-none p-0"
     >
-      <SettingsPanelNav
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        footer={navFooter}
-      />
-      <SettingsPanelContent>
-        {activeTabContent && activeTabContent()}
-      </SettingsPanelContent>
+      <SettingsPanelNavigation sections={sections} footer={navigationFooter} />
+      <SettingsPanelContent>{children}</SettingsPanelContent>
     </DialogRoot>
   );
 };

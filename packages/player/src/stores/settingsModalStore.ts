@@ -1,37 +1,29 @@
 import { create } from 'zustand';
 
-export type SettingsTab =
-  | 'general'
-  | 'shortcuts'
-  | 'plugins'
-  | 'themes'
-  | 'logs'
-  | 'whats-new';
-
 type SettingsModalState = {
   isOpen: boolean;
-  activeTab: SettingsTab;
-  // Phone-width only: the tab list is a drawer inside the panel. It lives here
-  // rather than inside SettingsPanel so the Android back button can close it
-  // before the panel itself.
+  activeItemId: string | null;
+  // Phone-width only: the nav sections are a drawer inside the panel. It lives
+  // here rather than inside SettingsPanel so the Android back button can close
+  // it before the panel itself.
   isNavOpen: boolean;
-  open: (tab?: SettingsTab) => void;
+  open: (itemId?: string) => void;
   close: () => void;
-  setActiveTab: (tab: SettingsTab) => void;
+  selectItem: (itemId: string) => void;
   setNavOpen: (isNavOpen: boolean) => void;
 };
 
 export const useSettingsModalStore = create<SettingsModalState>((set) => ({
   isOpen: false,
-  activeTab: 'general',
+  activeItemId: null,
   isNavOpen: false,
-  open: (tab) =>
+  open: (itemId) =>
     set((state) => ({
       isOpen: true,
       isNavOpen: false,
-      ...(tab ? { activeTab: tab } : { activeTab: state.activeTab }),
+      activeItemId: itemId ?? state.activeItemId,
     })),
   close: () => set({ isOpen: false, isNavOpen: false }),
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  selectItem: (itemId) => set({ activeItemId: itemId }),
   setNavOpen: (isNavOpen) => set({ isNavOpen }),
 }));
