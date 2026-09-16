@@ -68,6 +68,10 @@ export const createStreamingHost = (): StreamingHost => ({
       };
     }
 
+    Logger.streaming.debug(
+      `Resolving candidates for '${track.title}' via provider '${provider.id}' (active: '${providersHost.getActive('streaming')}')`,
+    );
+
     try {
       // Temporarily provide both methods to avoid breaking existing providers until we have autoupdate for plugins
       const candidates = provider.searchForTrackV2
@@ -77,6 +81,14 @@ export const createStreamingHost = (): StreamingHost => ({
             track.title,
             track.album?.title,
           );
+
+      Logger.streaming.debug(
+        `Got ${candidates.length} candidate(s) for '${track.title}': ${candidates
+          .map(
+            (c) => `${c.title} [${c.source.provider}] ${c.durationMs ?? '?'}ms`,
+          )
+          .join(' | ')}`,
+      );
 
       return {
         success: true,

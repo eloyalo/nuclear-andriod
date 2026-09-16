@@ -156,6 +156,79 @@ describe('rankCandidates', () => {
     ).toEqual([]);
   });
 
+  it('rejects an over-long candidate even when the track duration is unknown (e.g. an album track listing)', () => {
+    const candidates = [
+      candidate('compilation', 'XXXTENTACION - Rare', 565),
+      candidate('right-song', 'XXXTENTACION - Rare', 95),
+    ];
+
+    expect(
+      rankedIds(track('Rare', undefined, 'XXXTENTACION'), candidates),
+    ).toEqual(['right-song']);
+  });
+
+  it('does not reject anything by duration when the track duration is unknown and only one candidate reports a duration', () => {
+    const candidates = [candidate('compilation', 'XXXTENTACION - Rare', 565)];
+
+    expect(
+      rankedIds(track('Rare', undefined, 'XXXTENTACION'), candidates),
+    ).toEqual(['compilation']);
+  });
+
+  // Verbatim result set captured from the device (nucleartube/YouTube search
+  // for the album track "rare"), where a plain median over every candidate
+  // lands at 390s because most of the noise is long-form, and the 560s
+  // "[FULL EP]" upload survives and wins.
+  it('rejects the long-form upload for a real, noisy album-track result set', () => {
+    const candidates = [
+      candidate('full-ep', 'XXXTENTACION - rare [FULL EP]', 560),
+      candidate('official-audio', 'XXXTENTACION - rare (Official Audio)', 95),
+      candidate('bare', 'rare', 95),
+      candidate(
+        'documentary',
+        'Look at Me: XXXTentacion (2022) Documentary | 4K Restoration',
+        6640,
+      ),
+      candidate(
+        'box',
+        'XXXTENTACION Look At Me Special Edition Album Box',
+        842,
+      ),
+      candidate('look-at-me', 'XXXTENTACION - Look At Me! (Audio)', 128),
+      candidate(
+        'complete-album',
+        'XXXTENTACION - Look at Me Then (Complete Album)',
+        1684,
+      ),
+      candidate('hardest', 'Hardest XXXTENTACION Songs', 1575),
+      candidate(
+        'look-at-me-2',
+        'XXXTENTACION - LOOK AT ME 2 (Official Audio)',
+        97,
+      ),
+      candidate('king', 'King Of The Dead', 220),
+    ];
+
+    const ranked = rankedIds(
+      track('rare', undefined, 'XXXTENTACION'),
+      candidates,
+    );
+
+    expect(ranked[0]).toBe('official-audio');
+    expect(ranked).not.toContain('full-ep');
+  });
+
+  it('does not reject candidates shorter than their peers when the track duration is unknown', () => {
+    const candidates = [
+      candidate('short-snippet', 'XXXTENTACION - Rare', 20),
+      candidate('right-song', 'XXXTENTACION - Rare', 95),
+    ];
+
+    expect(
+      rankedIds(track('Rare', undefined, 'XXXTENTACION'), candidates),
+    ).toEqual(['short-snippet', 'right-song']);
+  });
+
   it("demotes other artists' versions of the same song", () => {
     const candidates = [
       candidate('panic', 'Panic! At The Disco - Bohemian Rhapsody', 362),
